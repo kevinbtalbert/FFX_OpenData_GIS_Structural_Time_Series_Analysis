@@ -13,11 +13,11 @@ runtimes:
 environment_variables:
   AZURE_OPENAI_ENDPOINT:
     default: ""
-    description: "Azure OpenAI endpoint URL (e.g., https://your-resource.openai.azure.com/). Leave empty to use mock chatbot for testing."
+    description: "Azure OpenAI endpoint URL (e.g., https://your-resource.openai.azure.com/). Leave empty for mock chatbot."
     prompt_user: true
   AZURE_OPENAI_API_KEY:
     default: ""
-    description: "Azure OpenAI API key. Leave empty to use mock chatbot for testing."
+    description: "Azure OpenAI API key. Leave empty for mock chatbot."
     prompt_user: true
   AZURE_OPENAI_DEPLOYMENT:
     default: "gpt-4"
@@ -25,14 +25,14 @@ environment_variables:
     prompt_user: false
   AZURE_OPENAI_API_VERSION:
     default: "2024-02-15-preview"
-    description: "Azure OpenAI API version (use default unless you have a specific version requirement)"
+    description: "Azure OpenAI API version (use default unless specific version needed)"
     prompt_user: false
 
 tasks:
   - type: run_session
     name: Install Dependencies
     short_summary: Install Python packages and dependencies
-    long_summary: Installs all required Python packages including Prophet, Streamlit, Plotly, and Azure OpenAI SDK. This step requires at least 4GB of memory and takes 3-5 minutes.
+    long_summary: Installs Prophet, Streamlit, Plotly, and Azure OpenAI SDK. Requires 4GB memory, takes 3-5 minutes.
     cpu: 2
     memory: 4
     kernel: python3
@@ -92,7 +92,7 @@ tasks:
   - type: run_session
     name: Validate Environment
     short_summary: Validate setup and configuration
-    long_summary: Runs the setup validation script to ensure all dependencies are installed correctly, CSV files are present, and the environment is ready for deployment.
+    long_summary: Validates dependencies, CSV files, and environment readiness for deployment.
     cpu: 1
     memory: 2
     kernel: python3
@@ -102,7 +102,7 @@ tasks:
   - type: run_session
     name: Train Initial Models
     short_summary: Train forecasting models for top districts
-    long_summary: Trains Prophet forecasting models for the top 5 districts by property value. This provides immediate forecasting capability when the application launches. Takes approximately 5-10 minutes.
+    long_summary: Trains Prophet models for top 5 districts by property value. Provides immediate forecasting capability. Takes 5-10 minutes.
     cpu: 2
     memory: 8
     kernel: python3
@@ -173,7 +173,7 @@ tasks:
     subdomain: fairfax-forecast
     script: apps/launch.py
     short_summary: Launch the Fairfax County Real Estate Forecast application
-    long_summary: Starts the dual-mode Streamlit application with visual dashboard (60%) and AI assistant (40%). The application provides interactive property value forecasts, risk analysis, and strategic insights through an Azure OpenAI-powered chatbot.
+    long_summary: Launches dual-mode Streamlit app with dashboard (60%) and AI assistant (40%). Provides forecasts, risk analysis, and strategic insights.
     cpu: 2
     memory: 4
     environment_variables:

@@ -6,36 +6,7 @@ entries:
     short_description: |
       AI-powered dual-mode application for forecasting Fairfax County property values with visual dashboards and strategic insights for technology planning.
     long_description: |
-      This AMP provides a comprehensive forecasting solution for Fairfax County real estate values using Prophet time series analysis.
-      The application features a dual-mode interface: a visual dashboard (60%) for interactive property value forecasts and risk analysis,
-      and an AI assistant (40%) powered by Azure OpenAI for strategic Q&A and executive insights.
-      
-      The forecasting engine uses Prophet to predict assessed property values at the district level for the next 6-12 months,
-      enabling data-driven technology decisions for budget defense, infrastructure planning, and service delivery optimization.
-      The application is designed for DIT Tech Management to anticipate revenue impacts, optimize infrastructure investments,
-      and proactively scale capacity based on demographic shifts.
-      
-      Key features include:
-      - District-level and county-wide property value forecasting
-      - Interactive Plotly visualizations with confidence intervals
-      - Risk assessment (downside risk and upside potential)
-      - Azure OpenAI-powered chatbot for strategic insights
-      - Modern UI with gradients, animations, and dark mode
-      - Modular architecture ready for Phase 2 external regressors (CPI, inflation)
-      - Python 3.13+ with Streamlit interface
-      
-      ---------------------------
-      IMPORTANT: Please read the following before proceeding. 
-      This AMP includes or otherwise depends on certain third-party software packages. 
-      Information about such third-party software packages are made available in the notice file associated with this AMP. 
-      By configuring and launching this AMP, you will cause such third-party software packages to be downloaded and installed 
-      into your environment, in some instances, from third parties' websites. 
-      For each third-party software package, please see the notice file and the applicable websites for more information, 
-      including the applicable license terms. 
-      If you do not wish to download and install the third-party software packages, 
-      do not configure, launch, or otherwise use this AMP. 
-      By configuring, launching, or otherwise using the AMP, you acknowledge the foregoing statement and 
-      agree that Cloudera is not responsible or liable in any way for the third-party software packages.
+      Forecasting solution for Fairfax County real estate values using Prophet time series analysis. Features a dual-mode interface with visual dashboard (60%) for interactive forecasts and AI assistant (40%) powered by Azure OpenAI for strategic insights. Predicts assessed property values at district level for 6-12 months, enabling data-driven decisions for budget defense, infrastructure planning, and service delivery. Includes interactive Plotly visualizations, risk assessment, modern UI with dark mode, and modular architecture ready for external regressors. Python 3.13+ with Streamlit.
     image_path: "https://raw.githubusercontent.com/kevinbtalbert/FFX_OpenData_GIS_Structural_Time_Series_Analysis/main/img/dashboard-preview.jpg"
     tags:
       - Time Series Forecasting
