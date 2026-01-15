@@ -1,0 +1,181 @@
+name: Fairfax County Real Estate Forecast
+description: Dual-mode application for forecasting Fairfax County real estate values with visual dashboards and AI-powered insights.
+author: Fairfax County Analytics Team
+specification_version: 1.0
+prototype_version: 3.0
+date: "2026-01-14"
+
+runtimes:
+  - editor: PBJ Workbench
+    kernel: Python 3.13
+    edition: Standard
+
+environment_variables:
+  AZURE_OPENAI_ENDPOINT:
+    default: ""
+    description: "Azure OpenAI endpoint URL (e.g., https://your-resource.openai.azure.com/). Leave empty to use mock chatbot for testing."
+    prompt_user: true
+  AZURE_OPENAI_API_KEY:
+    default: ""
+    description: "Azure OpenAI API key. Leave empty to use mock chatbot for testing."
+    prompt_user: true
+  AZURE_OPENAI_DEPLOYMENT:
+    default: "gpt-4"
+    description: "Azure OpenAI model deployment name (e.g., gpt-4, gpt-35-turbo)"
+    prompt_user: false
+  AZURE_OPENAI_API_VERSION:
+    default: "2024-02-15-preview"
+    description: "Azure OpenAI API version (use default unless you have a specific version requirement)"
+    prompt_user: false
+
+tasks:
+  - type: run_session
+    name: Install Dependencies
+    short_summary: Install Python packages and dependencies
+    long_summary: Installs all required Python packages including Prophet, Streamlit, Plotly, and Azure OpenAI SDK. This step requires at least 4GB of memory and takes 3-5 minutes.
+    cpu: 2
+    memory: 4
+    kernel: python3
+    script: |
+      # Install core dependencies
+      !pip3 install --upgrade pip
+      !pip3 install -r requirements.txt
+      
+      # Install Prophet (requires special handling)
+      !pip3 install prophet==1.1.5
+      
+      # Install the sts package in development mode
+      !pip3 install -e .
+      
+      # Verify installation
+      import sys
+      print(f"Python version: {sys.version}")
+      
+      # Test critical imports
+      try:
+          import pandas as pd
+          import numpy as np
+          import streamlit as st
+          import plotly
+          from prophet import Prophet
+          print("✓ All core packages installed successfully!")
+      except ImportError as e:
+          print(f"✗ Import error: {e}")
+          sys.exit(1)
+      
+      # Create necessary directories
+      import os
+      os.makedirs('data/models', exist_ok=True)
+      os.makedirs('data/forecasts', exist_ok=True)
+      os.makedirs('data/regressors', exist_ok=True)
+      print("✓ Data directories created")
+      
+      # Validate CSV files
+      csv_dir = 'csvs'
+      required_files = [
+          'Tax_Administration_s_Real_Estate_-_Assessed_Values.csv',
+          'Tax_Administration_s_Real_Estate_-_Parcel_Data.csv'
+      ]
+      
+      for filename in required_files:
+          filepath = os.path.join(csv_dir, filename)
+          if os.path.exists(filepath):
+              size_mb = os.path.getsize(filepath) / (1024 * 1024)
+              print(f"✓ Found {filename} ({size_mb:.1f} MB)")
+          else:
+              print(f"⚠ Warning: {filename} not found in csvs/ directory")
+      
+      print("\n" + "="*60)
+      print("Installation complete! Ready to launch application.")
+      print("="*60)
+
+  - type: run_session
+    name: Validate Environment
+    short_summary: Validate setup and configuration
+    long_summary: Runs the setup validation script to ensure all dependencies are installed correctly, CSV files are present, and the environment is ready for deployment.
+    cpu: 1
+    memory: 2
+    kernel: python3
+    script: |
+      !python3 scripts/setup_environment.py
+
+  - type: run_session
+    name: Train Initial Models
+    short_summary: Train forecasting models for top districts
+    long_summary: Trains Prophet forecasting models for the top 5 districts by property value. This provides immediate forecasting capability when the application launches. Takes approximately 5-10 minutes.
+    cpu: 2
+    memory: 8
+    kernel: python3
+    script: |
+      from sts.models.forecast_api import ForecastAPI
+      from sts.data.fairfax_loader import get_district_summary
+      import sys
+      
+      print("Training initial forecasting models...")
+      print("="*60)
+      
+      try:
+          # Initialize API
+          api = ForecastAPI()
+          
+          # Get top districts
+          summary = get_district_summary()
+          top_districts = summary.head(5)['district'].tolist()
+          
+          print(f"Training models for top 5 districts: {top_districts}")
+          print()
+          
+          # Train models
+          for i, district_id in enumerate(top_districts, 1):
+              print(f"[{i}/5] Training model for district {district_id}...")
+              try:
+                  model = api.train_model(
+                      district_id=district_id,
+                      periods_ahead=6,
+                      yearly_seasonality=10
+                  )
+                  
+                  # Generate initial forecast
+                  forecast = api.generate_forecast(
+                      district_id=district_id,
+                      periods_ahead=6,
+                      freq='MS'
+                  )
+                  
+                  print(f"    ✓ District {district_id} complete")
+              except Exception as e:
+                  print(f"    ✗ District {district_id} failed: {e}")
+          
+          # Train county-level model
+          print()
+          print("Training county-level model...")
+          try:
+              model = api.train_model(district_id=None, periods_ahead=6)
+              forecast = api.generate_forecast(district_id=None, periods_ahead=6)
+              print("    ✓ County-level model complete")
+          except Exception as e:
+              print(f"    ✗ County-level model failed: {e}")
+          
+          print()
+          print("="*60)
+          print("Initial model training complete!")
+          print("Models saved to: data/models/")
+          print("Forecasts saved to: data/forecasts/")
+          print("="*60)
+          
+      except Exception as e:
+          print(f"Error during model training: {e}")
+          print("Application will still launch but models need to be trained manually.")
+          sys.exit(0)  # Don't fail deployment, just warn
+
+  - type: start_application
+    name: Fairfax Real Estate Forecast
+    subdomain: fairfax-forecast
+    script: apps/launch.py
+    short_summary: Launch the Fairfax County Real Estate Forecast application
+    long_summary: Starts the dual-mode Streamlit application with visual dashboard (60%) and AI assistant (40%). The application provides interactive property value forecasts, risk analysis, and strategic insights through an Azure OpenAI-powered chatbot.
+    cpu: 2
+    memory: 4
+    environment_variables:
+      TASK_TYPE: START_APPLICATION
+    kernel: python3

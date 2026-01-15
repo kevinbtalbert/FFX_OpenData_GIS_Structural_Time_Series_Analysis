@@ -1,0 +1,46 @@
+# Fairfax County Real Estate Forecast - Python 3.13 Requirements
+# Updated: January 2026
+
+# Core Data Science
+pandas>=2.2.0
+numpy>=1.26.0
+scipy>=1.12.0
+
+# Time Series Forecasting
+prophet>=1.1.5
+statsmodels>=0.14.1
+
+# Visualization
+plotly>=5.18.0
+altair>=5.2.0
+matplotlib>=3.8.2
+seaborn>=0.13.1
+
+# Web Framework
+streamlit>=1.30.0
+streamlit-extras>=0.3.6
+
+# Azure OpenAI Integration
+openai>=1.10.0
+tiktoken>=0.5.2
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.66.1
+pyyaml>=6.0.1
+
+# Prophet Dependencies
+cmdstanpy>=1.2.0
+holidays>=0.40
+lunarcalendar>=0.0.9
+convertdate>=2.4.0
+
+# Additional Enhancements
+pytz>=2024.1
+python-dateutil>=2.8.2
+requests>=2.31.0
+
+# Development & Testing (optional)
+pytest>=8.0.0
+black>=24.1.0
+flake8>=7.0.0

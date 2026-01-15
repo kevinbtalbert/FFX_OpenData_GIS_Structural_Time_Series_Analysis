@@ -1,0 +1,61 @@
+# Environment variables (set via AMP deployment, not .env file)
+
+# Cursor documentation (internal use only)
+cursor/
+
+# Large CSV files not used by the application (over 50MB GitHub limit)
+csvs/Tax_Administration_s_Real_Estate_-_Parcel_Data.csv
+csvs/Tax_Administration_s_Real_Estate_-_Dwelling_Data.csv
+csvs/Tax_Administration_s_Real_Estate_-_Sales_Data.csv
+csvs/Tax_Administration_s_Real_Estate_-_Land_Data.csv
+csvs/Tax_Administration_s_Real_Estate_-_Commercial_Data.csv
+csvs/OpenData_H2_8152735509304097913.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Models and forecasts
+data/models/
+data/forecasts/
+*.pkl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/
