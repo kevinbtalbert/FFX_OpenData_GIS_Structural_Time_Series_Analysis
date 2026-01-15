@@ -36,13 +36,7 @@ tasks:
     cpu: 2
     memory: 4
     kernel: python3
-    script: |
-      !pip3 install --upgrade pip && pip3 install -r requirements.txt && pip3 install prophet==1.1.5 && pip3 install -e .
-      import sys, os, pandas, numpy, streamlit, plotly
-      from prophet import Prophet
-      os.makedirs('data/models', exist_ok=True)
-      os.makedirs('data/forecasts', exist_ok=True)
-      print("✓ Installation complete")
+    script: scripts/install_dependencies.py
 
   - type: run_session
     name: Validate Environment
@@ -51,8 +45,7 @@ tasks:
     cpu: 1
     memory: 2
     kernel: python3
-    script: |
-      !python3 scripts/setup_environment.py
+    script: scripts/setup_environment.py
 
   - type: run_session
     name: Train Initial Models
@@ -61,21 +54,7 @@ tasks:
     cpu: 2
     memory: 8
     kernel: python3
-    script: |
-      from sts.models.forecast_api import ForecastAPI
-      from sts.data.fairfax_loader import get_district_summary
-      import sys
-      try:
-          api = ForecastAPI()
-          districts = get_district_summary().head(5)['district'].tolist()
-          for d in districts:
-              api.train_model(district_id=d, periods_ahead=6, yearly_seasonality=10)
-              api.generate_forecast(district_id=d, periods_ahead=6, freq='MS')
-          api.train_model(district_id=None, periods_ahead=6)
-          print("✓ Training complete")
-      except Exception as e:
-          print(f"Training failed: {e}")
-          sys.exit(0)
+    script: scripts/train_initial_models.py
 
   - type: start_application
     name: Fairfax Real Estate Forecast
