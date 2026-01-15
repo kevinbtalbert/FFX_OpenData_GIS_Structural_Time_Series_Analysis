@@ -61,7 +61,6 @@ def check_csv_files():
     
     required_files = [
         'Tax_Administration_s_Real_Estate_-_Assessed_Values.csv',
-        'Tax_Administration_s_Real_Estate_-_Parcel_Data.csv'
     ]
     
     all_found = True
