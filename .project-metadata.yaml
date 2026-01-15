@@ -37,57 +37,12 @@ tasks:
     memory: 4
     kernel: python3
     script: |
-      # Install core dependencies
-      !pip3 install --upgrade pip
-      !pip3 install -r requirements.txt
-      
-      # Install Prophet (requires special handling)
-      !pip3 install prophet==1.1.5
-      
-      # Install the sts package in development mode
-      !pip3 install -e .
-      
-      # Verify installation
-      import sys
-      print(f"Python version: {sys.version}")
-      
-      # Test critical imports
-      try:
-          import pandas as pd
-          import numpy as np
-          import streamlit as st
-          import plotly
-          from prophet import Prophet
-          print("✓ All core packages installed successfully!")
-      except ImportError as e:
-          print(f"✗ Import error: {e}")
-          sys.exit(1)
-      
-      # Create necessary directories
-      import os
+      !pip3 install --upgrade pip && pip3 install -r requirements.txt && pip3 install prophet==1.1.5 && pip3 install -e .
+      import sys, os, pandas, numpy, streamlit, plotly
+      from prophet import Prophet
       os.makedirs('data/models', exist_ok=True)
       os.makedirs('data/forecasts', exist_ok=True)
-      os.makedirs('data/regressors', exist_ok=True)
-      print("✓ Data directories created")
-      
-      # Validate CSV files
-      csv_dir = 'csvs'
-      required_files = [
-          'Tax_Administration_s_Real_Estate_-_Assessed_Values.csv',
-          'Tax_Administration_s_Real_Estate_-_Parcel_Data.csv'
-      ]
-      
-      for filename in required_files:
-          filepath = os.path.join(csv_dir, filename)
-          if os.path.exists(filepath):
-              size_mb = os.path.getsize(filepath) / (1024 * 1024)
-              print(f"✓ Found {filename} ({size_mb:.1f} MB)")
-          else:
-              print(f"⚠ Warning: {filename} not found in csvs/ directory")
-      
-      print("\n" + "="*60)
-      print("Installation complete! Ready to launch application.")
-      print("="*60)
+      print("✓ Installation complete")
 
   - type: run_session
     name: Validate Environment
@@ -110,63 +65,17 @@ tasks:
       from sts.models.forecast_api import ForecastAPI
       from sts.data.fairfax_loader import get_district_summary
       import sys
-      
-      print("Training initial forecasting models...")
-      print("="*60)
-      
       try:
-          # Initialize API
           api = ForecastAPI()
-          
-          # Get top districts
-          summary = get_district_summary()
-          top_districts = summary.head(5)['district'].tolist()
-          
-          print(f"Training models for top 5 districts: {top_districts}")
-          print()
-          
-          # Train models
-          for i, district_id in enumerate(top_districts, 1):
-              print(f"[{i}/5] Training model for district {district_id}...")
-              try:
-                  model = api.train_model(
-                      district_id=district_id,
-                      periods_ahead=6,
-                      yearly_seasonality=10
-                  )
-                  
-                  # Generate initial forecast
-                  forecast = api.generate_forecast(
-                      district_id=district_id,
-                      periods_ahead=6,
-                      freq='MS'
-                  )
-                  
-                  print(f"    ✓ District {district_id} complete")
-              except Exception as e:
-                  print(f"    ✗ District {district_id} failed: {e}")
-          
-          # Train county-level model
-          print()
-          print("Training county-level model...")
-          try:
-              model = api.train_model(district_id=None, periods_ahead=6)
-              forecast = api.generate_forecast(district_id=None, periods_ahead=6)
-              print("    ✓ County-level model complete")
-          except Exception as e:
-              print(f"    ✗ County-level model failed: {e}")
-          
-          print()
-          print("="*60)
-          print("Initial model training complete!")
-          print("Models saved to: data/models/")
-          print("Forecasts saved to: data/forecasts/")
-          print("="*60)
-          
+          districts = get_district_summary().head(5)['district'].tolist()
+          for d in districts:
+              api.train_model(district_id=d, periods_ahead=6, yearly_seasonality=10)
+              api.generate_forecast(district_id=d, periods_ahead=6, freq='MS')
+          api.train_model(district_id=None, periods_ahead=6)
+          print("✓ Training complete")
       except Exception as e:
-          print(f"Error during model training: {e}")
-          print("Application will still launch but models need to be trained manually.")
-          sys.exit(0)  # Don't fail deployment, just warn
+          print(f"Training failed: {e}")
+          sys.exit(0)
 
   - type: start_application
     name: Fairfax Real Estate Forecast
