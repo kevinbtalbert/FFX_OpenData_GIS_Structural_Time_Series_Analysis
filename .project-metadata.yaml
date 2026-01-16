@@ -24,7 +24,7 @@ environment_variables:
     description: "Azure OpenAI model deployment name"
     prompt_user: false
   AZURE_OPENAI_API_VERSION:
-    default: "2024-02-15-preview"
+    default: "2024-11-20"
     description: "Azure OpenAI API version"
     prompt_user: false
 
