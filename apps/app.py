@@ -1056,6 +1056,9 @@ with col_chat:
                 # Clean the response
                 response = strip_tags(response)
                 
+                # Debug: print what we're actually storing
+                print(f"DEBUG - Response after stripping: {response[:200]}")
+                
             except Exception as e:
                 response = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
         
