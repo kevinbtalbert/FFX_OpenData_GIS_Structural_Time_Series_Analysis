@@ -28,8 +28,8 @@ class RealEstateChatbot:
         self,
         azure_endpoint: Optional[str] = None,
         api_key: Optional[str] = None,
-        api_version: str = "2024-02-15-preview",
-        deployment_name: str = "gpt-4"
+        api_version: Optional[str] = None,
+        deployment_name: Optional[str] = None
     ):
         """
         Initialize the chatbot with Azure OpenAI credentials.
@@ -37,14 +37,14 @@ class RealEstateChatbot:
         Args:
             azure_endpoint: Azure OpenAI endpoint URL (or set AZURE_OPENAI_ENDPOINT env var)
             api_key: Azure OpenAI API key (or set AZURE_OPENAI_API_KEY env var)
-            api_version: API version to use
-            deployment_name: Name of the deployed model
+            api_version: API version to use (or set AZURE_OPENAI_API_VERSION env var)
+            deployment_name: Name of the deployed model (or set AZURE_OPENAI_DEPLOYMENT env var)
         """
         # Get credentials from environment if not provided
         self.azure_endpoint = azure_endpoint or os.getenv('AZURE_OPENAI_ENDPOINT')
         self.api_key = api_key or os.getenv('AZURE_OPENAI_API_KEY')
-        self.api_version = api_version
-        self.deployment_name = deployment_name
+        self.api_version = api_version or os.getenv('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
+        self.deployment_name = deployment_name or os.getenv('AZURE_OPENAI_DEPLOYMENT', 'gpt-4')
         
         # Validate credentials
         if not self.azure_endpoint or not self.api_key:
