@@ -6,7 +6,7 @@ prototype_version: 3.0
 date: "2026-01-14"
 
 runtimes:
-  - editor: PBJ Workbench
+  - editor: JupyterLab
     kernel: Python 3.13
     edition: Standard
 
