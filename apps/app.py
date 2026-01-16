@@ -371,11 +371,11 @@ st.markdown("""
 # Force recreate chatbot to pick up new code (remove this check to always recreate)
 if 'chatbot' not in st.session_state or True:  # Always recreate for now
     try:
-        # Try to create real chatbot with Azure OpenAI
+        # Get Azure OpenAI credentials from environment
         azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
         azure_key = os.getenv('AZURE_OPENAI_API_KEY')
-        azure_deployment = os.getenv('AZURE_OPENAI_DEPLOYMENT')
-        azure_version = os.getenv('AZURE_OPENAI_API_VERSION')
+        azure_deployment = os.getenv('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o')  # Default to gpt-4o
+        azure_version = os.getenv('AZURE_OPENAI_API_VERSION', '2024-11-20')  # Default to latest
         
         print(f"[DEBUG] App initializing chatbot:")
         print(f"  Endpoint: {azure_endpoint}")
@@ -384,7 +384,14 @@ if 'chatbot' not in st.session_state or True:  # Always recreate for now
         print(f"  Has API Key: {bool(azure_key)}")
         
         if azure_endpoint and azure_key:
-            st.session_state.chatbot = create_chatbot(use_mock=False)
+            # Explicitly pass all parameters to chatbot
+            st.session_state.chatbot = create_chatbot(
+                use_mock=False,
+                azure_endpoint=azure_endpoint,
+                api_key=azure_key,
+                deployment_name=azure_deployment,
+                api_version=azure_version
+            )
             st.session_state.using_mock = False
             print(f"[DEBUG] Created real chatbot with deployment: {st.session_state.chatbot.deployment_name}")
         else:
