@@ -374,7 +374,7 @@ st.markdown("""
 # ==============================================================================
 
 with st.sidebar:
-    st.image("https://via.placeholder.com/300x100/667eea/ffffff?text=Fairfax+County", use_container_width=True)
+    st.image("https://via.placeholder.com/300x100/667eea/ffffff?text=Fairfax+County", width='stretch')
     
     st.markdown("### ⚙️ Configuration")
     
@@ -456,7 +456,7 @@ with st.sidebar:
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("🔄 Train", use_container_width=True, help="Train new model", key="train_btn"):
+        if st.button("🔄 Train", width='stretch', help="Train new model", key="train_btn"):
             with st.spinner("Training model... This may take 30-60 seconds."):
                 try:
                     st.session_state.forecast_api.train_model(
@@ -472,7 +472,7 @@ with st.sidebar:
                     st.code(traceback.format_exc())
     
     with col2:
-        if st.button("📊 Forecast", use_container_width=True, help="Generate forecast", key="forecast_btn"):
+        if st.button("📊 Forecast", width='stretch', help="Generate forecast", key="forecast_btn"):
             with st.spinner("Generating forecast..."):
                 try:
                     st.session_state.forecast_api.generate_forecast(
@@ -649,7 +649,7 @@ with col_dashboard:
             font=dict(family='Inter')
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         
         # RISK ASSESSMENT SECTION
         st.markdown("#### Revenue Risk Assessment")
@@ -702,7 +702,7 @@ with col_dashboard:
             
             st.dataframe(
                 predictions_df,
-                use_container_width=True,
+                width='stretch',
                 hide_index=True,
                 column_config={
                     "date": "Date",
@@ -767,7 +767,7 @@ with col_chat:
     with st.expander("💡 Suggested Questions", expanded=True):
         suggested = st.session_state.chatbot.get_suggested_questions()
         for i, question in enumerate(suggested[:5]):
-            if st.button(question, key=f"suggested_{i}", use_container_width=True):
+            if st.button(question, key=f"suggested_{i}", width='stretch'):
                 st.session_state.pending_question = question
                 st.rerun()
     
@@ -782,10 +782,10 @@ with col_chat:
     col_send, col_clear = st.columns([3, 1])
     
     with col_send:
-        send_button = st.button("📤 Send", type="primary", use_container_width=True)
+        send_button = st.button("📤 Send", type="primary", width='stretch')
     
     with col_clear:
-        if st.button("🗑️ Clear", use_container_width=True):
+        if st.button("🗑️ Clear", width='stretch'):
             st.session_state.chat_history = []
             st.session_state.chatbot.reset_conversation()
             st.rerun()
