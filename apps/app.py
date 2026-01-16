@@ -416,15 +416,19 @@ try:
                     messages.append({"role": "user", "content": user_message})
                     
                     st.write(f"DEBUG: Calling Azure OpenAI API")
+                    st.write(f"DEBUG: Client type = {type(self.client)}")
+                    st.write(f"DEBUG: Client base_url = {self.client.base_url}")
                     st.write(f"DEBUG: Model/Deployment = gpt-4o")
                     st.write(f"DEBUG: Messages = {len(messages)} messages")
                     
                     # Call Azure OpenAI - using deployment name from portal
+                    # Try with explicit azure_deployment parameter
                     response = self.client.chat.completions.create(
                         model='gpt-4o',  # This is the deployment name from Azure portal
                         messages=messages,
                         temperature=0.7,
-                        max_tokens=800
+                        max_tokens=800,
+                        extra_headers={"api-key": self.client.api_key}  # Explicitly pass API key in header
                     )
                     
                     st.success(f"DEBUG: Got response with {len(response.choices[0].message.content)} characters")
