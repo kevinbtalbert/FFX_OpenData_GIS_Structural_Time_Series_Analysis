@@ -378,16 +378,9 @@ try:
     if azure_endpoint and not azure_endpoint.endswith('/'):
         azure_endpoint = azure_endpoint + '/'
     
-    st.write(f"DEBUG: Endpoint = {azure_endpoint}")
-    st.write(f"DEBUG: Has Key = {bool(azure_key)}")
-    
     if azure_endpoint and azure_key:
-        # Use EXACT code from Azure portal
+        # Use Azure OpenAI SDK
         from openai import AzureOpenAI
-        
-        st.write("DEBUG: Using Azure OpenAI SDK (matching portal sample)")
-        st.write(f"DEBUG: Endpoint = {azure_endpoint}")
-        st.write(f"DEBUG: API Version = 2024-12-01-preview")
         
         client = AzureOpenAI(
             api_version="2024-12-01-preview",
@@ -440,7 +433,6 @@ try:
         
         st.session_state.chatbot = DirectChatbot(client)
         st.session_state.using_mock = False
-        st.success("DEBUG: Real chatbot created with gpt-4o using Azure SDK!")
     else:
         # Use mock
         st.warning("DEBUG: No credentials, using mock chatbot")
@@ -955,10 +947,6 @@ with col_chat:
         send_button = True
     
     if send_button and user_input:
-        st.write("🚀 DEBUG: Send button clicked!")
-        st.write(f"🚀 DEBUG: user_input = '{user_input}'")
-        st.write(f"🚀 DEBUG: chatbot type = {type(st.session_state.chatbot)}")
-        
         # Add user message
         st.session_state.chat_history.append({
             'role': 'user',
@@ -979,8 +967,6 @@ with col_chat:
             forecast_summary = None
             context = None
         
-        st.write("🚀 DEBUG: About to call chatbot.chat()")
-        
         # Get AI response
         with st.spinner("🤔 Thinking..."):
             try:
@@ -989,10 +975,8 @@ with col_chat:
                     forecast_data=forecast_summary,
                     context=context
                 )
-                st.write(f"🚀 DEBUG: Got response: {response[:100]}...")
             except Exception as e:
-                st.write(f"🚀 DEBUG: Exception caught: {str(e)}")
-                response = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question or contact support if the issue persists."
+                response = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
         
         # Add assistant message
         st.session_state.chat_history.append({
