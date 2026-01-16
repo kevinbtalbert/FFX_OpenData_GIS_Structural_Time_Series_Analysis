@@ -59,3 +59,4 @@ Thumbs.db
 
 # Streamlit (allow config.toml)
 .streamlit/secrets.toml
+AZURE_OPENAI_CREDENTIALS.txt
