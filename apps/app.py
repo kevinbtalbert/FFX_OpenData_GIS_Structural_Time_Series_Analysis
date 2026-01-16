@@ -896,25 +896,33 @@ with col_chat:
         """, unsafe_allow_html=True)
     
     # Chat container with scrollable history - build as single HTML block
+    import re
     from html.parser import HTMLParser
     
-    class TextExtractor(HTMLParser):
+    class MLStripper(HTMLParser):
         def __init__(self):
             super().__init__()
+            self.reset()
+            self.strict = False
+            self.convert_charrefs= True
             self.text = []
-        def handle_data(self, data):
-            self.text.append(data)
-        def get_text(self):
+        def handle_data(self, d):
+            self.text.append(d)
+        def get_data(self):
             return ''.join(self.text)
+    
+    def strip_html_tags(html):
+        """Completely remove all HTML tags and return only text content"""
+        s = MLStripper()
+        s.feed(html)
+        return s.get_data()
     
     chat_html = '<div class="chat-container">'
     
-    # Display chat history - extract only text content from HTML
+    # Display chat history - strip ALL HTML tags from content
     for message in st.session_state.chat_history:
-        # Extract plain text from any HTML in the message
-        parser = TextExtractor()
-        parser.feed(message['content'])
-        clean_content = parser.get_text()
+        # Completely strip all HTML tags
+        clean_content = strip_html_tags(message['content'])
         
         if message['role'] == 'user':
             chat_html += f"""
