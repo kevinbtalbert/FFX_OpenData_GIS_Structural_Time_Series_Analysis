@@ -374,6 +374,10 @@ try:
     azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT', 'https://ktalbert.openai.azure.com/')
     azure_key = os.getenv('AZURE_OPENAI_API_KEY')
     
+    # Ensure endpoint ends with /
+    if azure_endpoint and not azure_endpoint.endswith('/'):
+        azure_endpoint = azure_endpoint + '/'
+    
     st.write(f"DEBUG: Endpoint = {azure_endpoint}")
     st.write(f"DEBUG: Has Key = {bool(azure_key)}")
     
@@ -382,8 +386,9 @@ try:
         from openai import AzureOpenAI
         
         st.write("DEBUG: Creating AzureOpenAI client with gpt-4o")
+        st.write(f"DEBUG: API Version = 2024-11-20")
         
-        # Create Azure OpenAI client directly
+        # Create Azure OpenAI client directly - matching Azure portal sample
         client = AzureOpenAI(
             azure_endpoint=azure_endpoint,
             api_key=azure_key,
@@ -410,18 +415,25 @@ try:
                     
                     messages.append({"role": "user", "content": user_message})
                     
-                    st.write(f"DEBUG: Calling Azure OpenAI with model='gpt-4o'")
+                    st.write(f"DEBUG: Calling Azure OpenAI API")
+                    st.write(f"DEBUG: Model/Deployment = gpt-4o")
+                    st.write(f"DEBUG: Messages = {len(messages)} messages")
                     
+                    # Call Azure OpenAI - using deployment name from portal
                     response = self.client.chat.completions.create(
-                        model='gpt-4o',  # HARDCODED
+                        model='gpt-4o',  # This is the deployment name from Azure portal
                         messages=messages,
                         temperature=0.7,
                         max_tokens=800
                     )
                     
+                    st.success(f"DEBUG: Got response with {len(response.choices[0].message.content)} characters")
                     return response.choices[0].message.content
                 except Exception as e:
+                    import traceback
+                    error_details = traceback.format_exc()
                     st.error(f"DEBUG ERROR: {str(e)}")
+                    st.error(f"DEBUG TRACEBACK: {error_details}")
                     return f"Error: {str(e)}"
             
             def reset_conversation(self):
