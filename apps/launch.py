@@ -29,14 +29,21 @@ print(f"📍 Binding to port: {port}")
 print(f"🐍 Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
 print()
 
-# Use exec to replace the process (important for CML/CDSW)
-os.execvp('streamlit', [
-    'streamlit',
-    'run',
-    'apps/app.py',
-    '--server.port', str(port),
-    '--server.address', '127.0.0.1',
-    '--server.headless', 'true',
-    '--server.enableCORS', 'false',
-    '--server.enableXsrfProtection', 'false'
-])
+# Launch Streamlit (use subprocess instead of exec to see errors)
+try:
+    subprocess.run([
+        'streamlit',
+        'run',
+        'apps/app.py',
+        '--server.port', str(port),
+        '--server.address', '127.0.0.1',
+        '--server.headless', 'true',
+        '--server.enableCORS', 'false',
+        '--server.enableXsrfProtection', 'false'
+    ], check=True)
+except subprocess.CalledProcessError as e:
+    print(f"❌ Streamlit failed with exit code: {e.returncode}")
+    sys.exit(1)
+except Exception as e:
+    print(f"❌ Error launching Streamlit: {e}")
+    sys.exit(1)
