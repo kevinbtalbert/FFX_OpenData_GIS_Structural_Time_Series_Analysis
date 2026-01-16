@@ -29,20 +29,19 @@ print(f"📍 Binding to port: {port}")
 print(f"🐍 Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
 print()
 
-# Launch Streamlit (don't capture output so we can see debug logs)
-try:
-    # Use os.execvp to replace this process with Streamlit
-    # This allows all output to flow through to the logs
-    os.execvp('streamlit', [
-        'streamlit',
-        'run',
-        'apps/app.py',
-        '--server.port', str(port),
-        '--server.address', '127.0.0.1',
-        '--server.headless', 'true',
-        '--server.enableCORS', 'false',
-        '--server.enableXsrfProtection', 'false'
-    ])
-except Exception as e:
-    print(f"❌ Error launching Streamlit: {e}")
-    sys.exit(1)
+# Launch Streamlit with error capture
+print("🔍 Starting Streamlit with debug output...")
+result = subprocess.run([
+    'streamlit',
+    'run',
+    'apps/app.py',
+    '--server.port', str(port),
+    '--server.address', '127.0.0.1',
+    '--server.headless', 'true',
+    '--server.enableCORS', 'false',
+    '--server.enableXsrfProtection', 'false'
+], capture_output=False, text=True)
+
+if result.returncode != 0:
+    print(f"❌ Streamlit exited with code: {result.returncode}")
+    sys.exit(result.returncode)
