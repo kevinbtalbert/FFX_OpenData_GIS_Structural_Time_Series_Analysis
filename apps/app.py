@@ -793,6 +793,29 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
                     forecast_data=forecast_summary
                 )
                 
+                # Strip HTML tags from AI explanation
+                import re
+                from html.parser import HTMLParser
+                
+                class MLStripper(HTMLParser):
+                    def __init__(self):
+                        super().__init__()
+                        self.reset()
+                        self.strict = False
+                        self.convert_charrefs= True
+                        self.text = []
+                    def handle_data(self, d):
+                        self.text.append(d)
+                    def get_data(self):
+                        return ''.join(self.text)
+                
+                def strip_tags(html):
+                    s = MLStripper()
+                    s.feed(html)
+                    return s.get_data()
+                
+                ai_explanation = strip_tags(ai_explanation)
+                
                 st.markdown(f"""
                 <div class="info-box">
                     <p style="margin: 0; line-height: 1.6;">{ai_explanation}</p>
@@ -1008,10 +1031,35 @@ with col_chat:
                     forecast_data=forecast_summary,
                     context=context
                 )
+                
+                # Strip any HTML tags from the response
+                import re
+                from html.parser import HTMLParser
+                
+                class MLStripper(HTMLParser):
+                    def __init__(self):
+                        super().__init__()
+                        self.reset()
+                        self.strict = False
+                        self.convert_charrefs= True
+                        self.text = []
+                    def handle_data(self, d):
+                        self.text.append(d)
+                    def get_data(self):
+                        return ''.join(self.text)
+                
+                def strip_tags(html):
+                    s = MLStripper()
+                    s.feed(html)
+                    return s.get_data()
+                
+                # Clean the response
+                response = strip_tags(response)
+                
             except Exception as e:
                 response = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
         
-        # Add assistant message
+        # Add assistant message (now cleaned of HTML)
         st.session_state.chat_history.append({
             'role': 'assistant',
             'content': response
