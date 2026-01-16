@@ -58,6 +58,11 @@ class RealEstateChatbot:
         if AzureOpenAI is None:
             raise ImportError("openai package not installed. Install with: pip install openai")
         
+        print(f"[DEBUG] Initializing RealEstateChatbot:")
+        print(f"  Endpoint: {self.azure_endpoint}")
+        print(f"  Deployment: {self.deployment_name}")
+        print(f"  API Version: {self.api_version}")
+        
         self.client = AzureOpenAI(
             azure_endpoint=self.azure_endpoint,
             api_key=self.api_key,
@@ -134,6 +139,7 @@ You have access to real estate forecast data and can answer questions about:
         
         # Call Azure OpenAI
         try:
+            print(f"[DEBUG] Calling Azure OpenAI with deployment: {self.deployment_name}")
             response = self.client.chat.completions.create(
                 model=self.deployment_name,
                 messages=messages,
@@ -154,7 +160,11 @@ You have access to real estate forecast data and can answer questions about:
             return assistant_message
             
         except Exception as e:
-            return f"Error communicating with Azure OpenAI: {str(e)}"
+            error_msg = f"Error communicating with Azure OpenAI: {str(e)}"
+            print(f"[ERROR] {error_msg}")
+            print(f"[ERROR] Deployment used: {self.deployment_name}")
+            print(f"[ERROR] Endpoint: {self.azure_endpoint}")
+            return error_msg
     
     def _build_context_message(
         self,
