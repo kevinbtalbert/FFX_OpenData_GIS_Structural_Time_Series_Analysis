@@ -11,13 +11,40 @@ import numpy as np
 from typing import Optional, List, Dict
 
 
+def load_fairfax_raw_data(
+    assessed_values_path='csvs/Tax_Administration_s_Real_Estate_-_Assessed_Values.csv'
+) -> pd.DataFrame:
+    """
+    Load raw Fairfax County real estate data.
+    
+    Args:
+        assessed_values_path: Path to assessed values CSV
+        
+    Returns:
+        DataFrame with all property records including district
+    """
+    print(f"Loading data from {assessed_values_path}...")
+    df = pd.read_csv(assessed_values_path)
+    
+    # Extract district from PARID (first 4 digits)
+    df['district'] = df['PARID'].astype(str).str[:4]
+    
+    print(f"✓ Loaded {len(df):,} properties")
+    print(f"  Tax Year: {df['TAXYR'].unique()}")
+    print(f"  Districts: {df['district'].nunique()}")
+    print(f"  Total Assessed Value: ${df['APRTOT'].sum():,.0f}")
+    
+    return df
+
+
 def load_fairfax_assessed_values(
     assessed_values_path='csvs/Tax_Administration_s_Real_Estate_-_Assessed_Values.csv',
     parcel_data_path='csvs/Tax_Administration_s_Real_Estate_-_Parcel_Data.csv',
     district_column='district',
     aggregate_by='district',
     min_year=None,
-    max_year=None
+    max_year=None,
+    generate_historical=False
 ) -> pd.DataFrame:
     """
     Load and prepare Fairfax County real estate assessed values for time series forecasting.
@@ -29,6 +56,7 @@ def load_fairfax_assessed_values(
         aggregate_by: How to aggregate data ('district', 'quadname', or 'county')
         min_year: Minimum tax year to include (optional)
         max_year: Maximum tax year to include (optional)
+        generate_historical: If True and only one year exists, generate synthetic historical data
     
     Returns:
         DataFrame with columns ['ds', 'y', 'district'] where:
@@ -43,6 +71,10 @@ def load_fairfax_assessed_values(
     
     # Extract district from PARID (first 4 digits)
     df_assessed['district'] = df_assessed['PARID'].str[:4]
+    
+    # Check if we only have one year of data
+    unique_years = df_assessed['TAXYR'].nunique()
+    print(f"Found {unique_years} unique tax year(s): {sorted(df_assessed['TAXYR'].unique())}")
     
     # Filter by year if specified
     if min_year:
@@ -64,11 +96,83 @@ def load_fairfax_assessed_values(
     else:
         raise ValueError(f"aggregate_by must be 'district' or 'county', got {aggregate_by}")
     
+    # Generate synthetic historical data if needed
+    if generate_historical and unique_years == 1:
+        print("⚠️  Only one year of data detected. Generating synthetic historical data for demonstration...")
+        grouped = _generate_historical_data(grouped, aggregate_by)
+    
     print(f"Loaded {len(grouped)} district-year combinations")
-    print(f"Tax years: {df_assessed['TAXYR'].min()} to {df_assessed['TAXYR'].max()}")
-    print(f"Districts: {sorted(df_assessed['district'].unique())[:10]}... ({df_assessed['district'].nunique()} total)")
+    if len(grouped) > 0:
+        print(f"Date range: {grouped['ds'].min()} to {grouped['ds'].max()}")
+        if 'district' in grouped.columns:
+            print(f"Districts: {sorted(grouped['district'].unique())[:10]}... ({grouped['district'].nunique()} total)")
     
     return grouped
+
+
+def _generate_historical_data(df: pd.DataFrame, aggregate_by: str, years_back: int = 10) -> pd.DataFrame:
+    """
+    Generate synthetic historical data based on current year data.
+    Applies realistic growth rates (2-5% annually) with some variance.
+    
+    Args:
+        df: DataFrame with current year data
+        aggregate_by: 'district' or 'county'
+        years_back: Number of historical years to generate
+    
+    Returns:
+        DataFrame with synthetic historical data appended
+    """
+    if len(df) == 0:
+        return df
+    
+    # Get the current year
+    current_year = df['ds'].max()
+    current_year_num = current_year.year
+    
+    # Generate historical years
+    historical_dfs = []
+    
+    # Annual growth rate: 3% average with some variance
+    np.random.seed(42)  # For reproducibility
+    
+    for year_offset in range(1, years_back + 1):
+        # Calculate year
+        hist_year = current_year_num - year_offset
+        hist_date = pd.Timestamp(f'{hist_year}-01-01')
+        
+        # Create copy of current data
+        hist_df = df.copy()
+        hist_df['ds'] = hist_date
+        
+        # Apply compound growth rate backwards (deflate values)
+        # Use 3% average growth with slight variance per district
+        if aggregate_by == 'district':
+            for district in hist_df['district'].unique():
+                mask = hist_df['district'] == district
+                # Random growth rate between 2.5% and 4.5% per year
+                growth_rate = np.random.uniform(0.025, 0.045)
+                deflation_factor = (1 - growth_rate) ** year_offset
+                hist_df.loc[mask, 'y'] = hist_df.loc[mask, 'y'] * deflation_factor
+                if 'mean_value' in hist_df.columns:
+                    hist_df.loc[mask, 'mean_value'] = hist_df.loc[mask, 'mean_value'] * deflation_factor
+        else:
+            growth_rate = 0.035  # 3.5% for county total
+            deflation_factor = (1 - growth_rate) ** year_offset
+            hist_df['y'] = hist_df['y'] * deflation_factor
+            if 'mean_value' in hist_df.columns:
+                hist_df['mean_value'] = hist_df['mean_value'] * deflation_factor
+        
+        historical_dfs.append(hist_df)
+    
+    # Combine all data
+    all_data = pd.concat([df] + historical_dfs, ignore_index=True)
+    all_data = all_data.sort_values(['district', 'ds'] if 'district' in all_data.columns else 'ds')
+    
+    print(f"✓ Generated {years_back} years of synthetic historical data ({current_year_num - years_back} to {current_year_num})")
+    print(f"  Using realistic growth rates (2.5-4.5% annually)")
+    
+    return all_data.reset_index(drop=True)
 
 
 def load_district_data(district_id: str, **kwargs) -> pd.DataFrame:
@@ -148,6 +252,17 @@ def prepare_prophet_data(
     else:
         df = load_fairfax_assessed_values(aggregate_by='county', **kwargs)
         df = df[['ds', 'y']].copy()
+    
+    # Validate data
+    print(f"Prepared data shape: {df.shape}")
+    print(f"Data preview:\n{df.head()}")
+    print(f"Non-null rows: {df.dropna().shape[0]}")
+    
+    if len(df) < 2:
+        raise ValueError(f"Insufficient data: only {len(df)} rows found. Need at least 2 rows for forecasting.")
+    
+    if df['y'].isna().all():
+        raise ValueError("All values are NaN. Check data quality.")
     
     return df
 

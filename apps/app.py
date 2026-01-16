@@ -18,7 +18,7 @@ import sys
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from sts.models.forecast_api import ForecastAPI, get_forecast_summary
+from sts.models.projection_api import ProjectionAPI, get_forecast_summary
 from sts.data.fairfax_loader import get_available_districts, get_district_summary
 from sts.ai.chatbot import create_chatbot
 
@@ -353,7 +353,7 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
 if 'forecast_api' not in st.session_state:
-    st.session_state.forecast_api = ForecastAPI()
+    st.session_state.forecast_api = ProjectionAPI()
 
 if 'theme' not in st.session_state:
     st.session_state.theme = 'light'

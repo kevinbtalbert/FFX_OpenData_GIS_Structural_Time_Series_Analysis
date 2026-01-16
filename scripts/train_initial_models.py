@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 Train Initial Models Script
-Trains Prophet forecasting models for top districts.
+Trains projection models for top districts.
 """
 
 import sys
-from sts.models.forecast_api import ForecastAPI
+from sts.models.projection_api import ProjectionAPI
 from sts.data.fairfax_loader import get_district_summary
 
 def main():
@@ -14,7 +14,7 @@ def main():
     
     try:
         # Initialize API
-        api = ForecastAPI()
+        api = ProjectionAPI()
         
         # Get top districts
         summary = get_district_summary()
@@ -30,14 +30,13 @@ def main():
                 model = api.train_model(
                     district_id=district_id,
                     periods_ahead=6,
-                    yearly_seasonality=10
+                    growth_rate=0.03
                 )
                 
                 # Generate initial forecast
                 forecast = api.generate_forecast(
                     district_id=district_id,
-                    periods_ahead=6,
-                    freq='MS'
+                    periods_ahead=6
                 )
                 
                 print(f"    ✓ District {district_id} complete")
