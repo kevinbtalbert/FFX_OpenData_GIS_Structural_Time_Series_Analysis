@@ -373,16 +373,25 @@ if 'chatbot' not in st.session_state:
         # Try to create real chatbot with Azure OpenAI
         azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
         azure_key = os.getenv('AZURE_OPENAI_API_KEY')
+        azure_deployment = os.getenv('AZURE_OPENAI_DEPLOYMENT')
+        
+        print(f"[DEBUG] Initializing chatbot:")
+        print(f"  Endpoint: {azure_endpoint}")
+        print(f"  Deployment: {azure_deployment}")
+        print(f"  Has API Key: {bool(azure_key)}")
         
         if azure_endpoint and azure_key:
             st.session_state.chatbot = create_chatbot(use_mock=False)
             st.session_state.using_mock = False
+            print(f"[DEBUG] Created real chatbot with deployment: {st.session_state.chatbot.deployment_name}")
         else:
             # No credentials, use mock
             st.session_state.chatbot = create_chatbot(use_mock=True)
             st.session_state.using_mock = True
+            print("[DEBUG] Using mock chatbot (no credentials)")
     except Exception as e:
         # Fallback to mock on any error
+        print(f"[DEBUG] Error creating chatbot: {e}")
         st.session_state.chatbot = create_chatbot(use_mock=True)
         st.session_state.using_mock = True
 
