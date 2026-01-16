@@ -93,12 +93,12 @@ st.markdown("""
     
     /* Metric cards */
     .metric-card {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
         padding: 1.5rem;
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: transform 0.2s, box-shadow 0.2s;
-        border: 1px solid rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .metric-card:hover {
@@ -109,14 +109,14 @@ st.markdown("""
     .metric-value {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #667eea;
+        color: #ffffff !important;
         margin: 0.5rem 0;
         font-family: 'JetBrains Mono', monospace;
     }
     
     .metric-label {
         font-size: 0.9rem;
-        color: #64748b;
+        color: #e2e8f0 !important;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -384,7 +384,14 @@ st.markdown("""
 # ==============================================================================
 
 with st.sidebar:
-    st.image("https://via.placeholder.com/300x100/667eea/ffffff?text=Fairfax+County", width='stretch')
+    # Logo/Header
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 1.5rem; border-radius: 8px; text-align: center; margin-bottom: 1rem;">
+        <h2 style="color: white; margin: 0;">🏘️ Fairfax County</h2>
+        <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 0.9rem;">Real Estate Forecast</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("### ⚙️ Configuration")
     
@@ -576,7 +583,7 @@ with col_dashboard:
             <div class="metric-card">
                 <div class="metric-label">Forecast Horizon</div>
                 <div class="metric-value">{num_periods}</div>
-                <div style="font-size: 0.9rem; color: #64748b; margin-top: 0.5rem;">months ahead</div>
+                <div style="font-size: 0.9rem; color: #e2e8f0; margin-top: 0.5rem;">months ahead</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -823,29 +830,34 @@ with col_chat:
                 st.session_state.pending_question = question
                 st.rerun()
     
-    # User input
-    user_input = st.text_input(
-        "Ask a question:",
-        placeholder="e.g., What's the revenue outlook for next quarter?",
-        key="user_input",
-        label_visibility="collapsed"
-    )
+    # User input with form for Enter key support
+    with st.form(key="chat_form", clear_on_submit=True):
+        user_input = st.text_input(
+            "Ask a question:",
+            placeholder="e.g., What's the revenue outlook for next quarter?",
+            key="user_input_field",
+            label_visibility="collapsed"
+        )
+        
+        col_send, col_clear = st.columns([3, 1])
+        
+        with col_send:
+            send_button = st.form_submit_button("📤 Send", type="primary", use_container_width=True)
+        
+        with col_clear:
+            clear_button = st.form_submit_button("🗑️ Clear", use_container_width=True)
     
-    col_send, col_clear = st.columns([3, 1])
+    # Handle clear button
+    if clear_button:
+        st.session_state.chat_history = []
+        st.session_state.chatbot.reset_conversation()
+        st.rerun()
     
-    with col_send:
-        send_button = st.button("📤 Send", type="primary", width='stretch')
-    
-    with col_clear:
-        if st.button("🗑️ Clear", width='stretch'):
-            st.session_state.chat_history = []
-            st.session_state.chatbot.reset_conversation()
-            st.rerun()
-    
-    # Handle pending question or user input
+    # Handle pending question from suggested questions
     if hasattr(st.session_state, 'pending_question'):
         user_input = st.session_state.pending_question
         del st.session_state.pending_question
+        send_button = True
     
     if send_button and user_input:
         # Add user message
