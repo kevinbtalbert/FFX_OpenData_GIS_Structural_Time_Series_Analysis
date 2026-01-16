@@ -368,40 +368,75 @@ st.markdown("""
 # SESSION STATE INITIALIZATION
 # ==============================================================================
 
-# Force recreate chatbot to pick up new code (remove this check to always recreate)
-if 'chatbot' not in st.session_state or True:  # Always recreate for now
+# Initialize chatbot with hardcoded gpt-4o to bypass all env var issues
+if 'chatbot' not in st.session_state:
     try:
-        # Get Azure OpenAI credentials from environment
-        azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+        # Get credentials from environment
+        azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT', 'https://ktalbert.openai.azure.com/')
         azure_key = os.getenv('AZURE_OPENAI_API_KEY')
-        azure_deployment = os.getenv('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o')  # Default to gpt-4o
-        azure_version = os.getenv('AZURE_OPENAI_API_VERSION', '2024-11-20')  # Default to latest
-        
-        print(f"[DEBUG] App initializing chatbot:")
-        print(f"  Endpoint: {azure_endpoint}")
-        print(f"  Deployment: {azure_deployment}")
-        print(f"  API Version: {azure_version}")
-        print(f"  Has API Key: {bool(azure_key)}")
         
         if azure_endpoint and azure_key:
-            # Explicitly pass all parameters to chatbot
-            st.session_state.chatbot = create_chatbot(
-                use_mock=False,
+            # Create chatbot with HARDCODED gpt-4o deployment
+            from openai import AzureOpenAI
+            
+            # Create Azure OpenAI client directly
+            client = AzureOpenAI(
                 azure_endpoint=azure_endpoint,
                 api_key=azure_key,
-                deployment_name=azure_deployment,
-                api_version=azure_version
+                api_version='2024-11-20'
             )
+            
+            # Create a simple wrapper class
+            class DirectChatbot:
+                def __init__(self, client):
+                    self.client = client
+                    self.deployment_name = 'gpt-4o'  # HARDCODED
+                    self.conversation_history = []
+                
+                def chat(self, user_message, forecast_data=None, context=None, **kwargs):
+                    try:
+                        messages = [
+                            {"role": "system", "content": "You are an AI assistant for Fairfax County real estate forecasting. Provide concise, executive-focused insights about property values, trends, and revenue risks."}
+                        ]
+                        
+                        # Add context if available
+                        if forecast_data:
+                            context_msg = f"Current forecast data: Total value ${forecast_data.get('base_value', 0):,.0f}, Growth {forecast_data.get('total_growth_pct', 0):.2f}%"
+                            messages.append({"role": "system", "content": context_msg})
+                        
+                        messages.append({"role": "user", "content": user_message})
+                        
+                        response = self.client.chat.completions.create(
+                            model='gpt-4o',  # HARDCODED
+                            messages=messages,
+                            temperature=0.7,
+                            max_tokens=800
+                        )
+                        
+                        return response.choices[0].message.content
+                    except Exception as e:
+                        return f"Error: {str(e)}"
+                
+                def reset_conversation(self):
+                    self.conversation_history = []
+                
+                def get_suggested_questions(self, forecast_data=None):
+                    return [
+                        "What is the predicted property value for the next 6 months?",
+                        "Which districts show the highest growth potential?",
+                        "What is the revenue risk if values decline?",
+                        "How confident are these predictions?",
+                        "What factors could impact these forecasts?"
+                    ]
+            
+            st.session_state.chatbot = DirectChatbot(client)
             st.session_state.using_mock = False
-            print(f"[DEBUG] Created real chatbot with deployment: {st.session_state.chatbot.deployment_name}")
         else:
-            # No credentials, use mock
+            # Use mock
             st.session_state.chatbot = create_chatbot(use_mock=True)
             st.session_state.using_mock = True
-            print("[DEBUG] Using mock chatbot (no credentials)")
     except Exception as e:
-        # Fallback to mock on any error
-        print(f"[DEBUG] Error creating chatbot: {e}")
+        print(f"Error creating chatbot: {e}")
         import traceback
         traceback.print_exc()
         st.session_state.chatbot = create_chatbot(use_mock=True)
