@@ -35,7 +35,7 @@ os.execvp('streamlit', [
     'run',
     'apps/app.py',
     '--server.port', str(port),
-    '--server.address', '0.0.0.0',
+    '--server.address', '127.0.0.1',
     '--server.headless', 'true',
     '--server.enableCORS', 'false',
     '--server.enableXsrfProtection', 'false'
