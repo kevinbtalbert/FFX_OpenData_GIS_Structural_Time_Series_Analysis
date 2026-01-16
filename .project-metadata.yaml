@@ -64,6 +64,4 @@ tasks:
     long_summary: Launches dual-mode Streamlit app with dashboard (60%) and AI assistant (40%). Provides forecasts, risk analysis, and strategic insights.
     cpu: 2
     memory: 4
-    environment_variables:
-      TASK_TYPE: START_APPLICATION
     kernel: python3
