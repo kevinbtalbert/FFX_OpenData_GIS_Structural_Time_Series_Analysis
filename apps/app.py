@@ -103,6 +103,11 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         justify-content: center;
+        color: white !important;
+    }
+    
+    .metric-card * {
+        color: white !important;
     }
 
     .metric-card:hover {
@@ -890,27 +895,39 @@ with col_chat:
         </div>
         """, unsafe_allow_html=True)
     
-    # Chat container with scrollable history
-    import html
+    # Chat container with scrollable history - build as single HTML block
+    from html.parser import HTMLParser
+    
+    class TextExtractor(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.text = []
+        def handle_data(self, data):
+            self.text.append(data)
+        def get_text(self):
+            return ''.join(self.text)
+    
     chat_html = '<div class="chat-container">'
     
-    # Display chat history
+    # Display chat history - extract only text content from HTML
     for message in st.session_state.chat_history:
-        # Escape HTML to prevent code from showing
-        content = html.escape(message['content'])
+        # Extract plain text from any HTML in the message
+        parser = TextExtractor()
+        parser.feed(message['content'])
+        clean_content = parser.get_text()
         
         if message['role'] == 'user':
             chat_html += f"""
             <div class="chat-message user-message">
-                <strong style="color: white;">👤 You</strong>
-                <p style="color: white;">{content}</p>
+                <strong style="color: white !important;">👤 You</strong><br>
+                <span style="color: white !important;">{clean_content}</span>
             </div>
             """
         else:
             chat_html += f"""
             <div class="chat-message assistant-message">
-                <strong>🤖 AI Assistant</strong>
-                <p>{content}</p>
+                <strong>🤖 AI Assistant</strong><br>
+                <span>{clean_content}</span>
             </div>
             """
     
