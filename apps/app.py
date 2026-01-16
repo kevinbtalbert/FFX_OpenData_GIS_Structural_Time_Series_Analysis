@@ -368,16 +368,19 @@ st.markdown("""
 # SESSION STATE INITIALIZATION
 # ==============================================================================
 
-if 'chatbot' not in st.session_state:
+# Force recreate chatbot to pick up new code (remove this check to always recreate)
+if 'chatbot' not in st.session_state or True:  # Always recreate for now
     try:
         # Try to create real chatbot with Azure OpenAI
         azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
         azure_key = os.getenv('AZURE_OPENAI_API_KEY')
         azure_deployment = os.getenv('AZURE_OPENAI_DEPLOYMENT')
+        azure_version = os.getenv('AZURE_OPENAI_API_VERSION')
         
-        print(f"[DEBUG] Initializing chatbot:")
+        print(f"[DEBUG] App initializing chatbot:")
         print(f"  Endpoint: {azure_endpoint}")
         print(f"  Deployment: {azure_deployment}")
+        print(f"  API Version: {azure_version}")
         print(f"  Has API Key: {bool(azure_key)}")
         
         if azure_endpoint and azure_key:
@@ -392,6 +395,8 @@ if 'chatbot' not in st.session_state:
     except Exception as e:
         # Fallback to mock on any error
         print(f"[DEBUG] Error creating chatbot: {e}")
+        import traceback
+        traceback.print_exc()
         st.session_state.chatbot = create_chatbot(use_mock=True)
         st.session_state.using_mock = True
 
