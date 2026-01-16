@@ -382,24 +382,23 @@ try:
     st.write(f"DEBUG: Has Key = {bool(azure_key)}")
     
     if azure_endpoint and azure_key:
-        # Create chatbot with HARDCODED gpt-4o deployment
+        # Use EXACT code from Azure portal
         from openai import AzureOpenAI
         
-        st.write("DEBUG: Creating AzureOpenAI client with gpt-4o")
-        st.write(f"DEBUG: API Version = 2024-11-20")
+        st.write("DEBUG: Using Azure OpenAI SDK (matching portal sample)")
+        st.write(f"DEBUG: Endpoint = {azure_endpoint}")
+        st.write(f"DEBUG: API Version = 2024-12-01-preview")
         
-        # Create Azure OpenAI client directly - matching Azure portal sample
         client = AzureOpenAI(
+            api_version="2024-12-01-preview",
             azure_endpoint=azure_endpoint,
             api_key=azure_key,
-            api_version='2024-11-20'
         )
         
-        # Create a simple wrapper class
+        # Simple wrapper matching Azure's sample code
         class DirectChatbot:
             def __init__(self, client):
                 self.client = client
-                self.deployment_name = 'gpt-4o'  # HARDCODED
                 self.conversation_history = []
             
             def chat(self, user_message, forecast_data=None, context=None, **kwargs):
@@ -408,36 +407,23 @@ try:
                         {"role": "system", "content": "You are an AI assistant for Fairfax County real estate forecasting. Provide concise, executive-focused insights about property values, trends, and revenue risks."}
                     ]
                     
-                    # Add context if available
                     if forecast_data:
                         context_msg = f"Current forecast data: Total value ${forecast_data.get('base_value', 0):,.0f}, Growth {forecast_data.get('total_growth_pct', 0):.2f}%"
                         messages.append({"role": "system", "content": context_msg})
                     
                     messages.append({"role": "user", "content": user_message})
                     
-                    st.write(f"DEBUG: Calling Azure OpenAI API")
-                    st.write(f"DEBUG: Client type = {type(self.client)}")
-                    st.write(f"DEBUG: Client base_url = {self.client.base_url}")
-                    st.write(f"DEBUG: Model/Deployment = gpt-4o")
-                    st.write(f"DEBUG: Messages = {len(messages)} messages")
-                    
-                    # Call Azure OpenAI - using deployment name from portal
-                    # Try with explicit azure_deployment parameter
-                    response = self.client.chat.completions.create(
-                        model='gpt-4o',  # This is the deployment name from Azure portal
+                    # Use EXACT parameters from Azure sample
+                    completion = self.client.chat.completions.create(
+                        model="gpt-4o",
                         messages=messages,
                         temperature=0.7,
-                        max_tokens=800,
-                        extra_headers={"api-key": self.client.api_key}  # Explicitly pass API key in header
+                        max_tokens=800
                     )
                     
-                    st.success(f"DEBUG: Got response with {len(response.choices[0].message.content)} characters")
-                    return response.choices[0].message.content
+                    return completion.choices[0].message.content
+                    
                 except Exception as e:
-                    import traceback
-                    error_details = traceback.format_exc()
-                    st.error(f"DEBUG ERROR: {str(e)}")
-                    st.error(f"DEBUG TRACEBACK: {error_details}")
                     return f"Error: {str(e)}"
             
             def reset_conversation(self):
@@ -454,7 +440,7 @@ try:
         
         st.session_state.chatbot = DirectChatbot(client)
         st.session_state.using_mock = False
-        st.success("DEBUG: Real chatbot created with gpt-4o!")
+        st.success("DEBUG: Real chatbot created with gpt-4o using Azure SDK!")
     else:
         # Use mock
         st.warning("DEBUG: No credentials, using mock chatbot")
@@ -969,6 +955,10 @@ with col_chat:
         send_button = True
     
     if send_button and user_input:
+        st.write("🚀 DEBUG: Send button clicked!")
+        st.write(f"🚀 DEBUG: user_input = '{user_input}'")
+        st.write(f"🚀 DEBUG: chatbot type = {type(st.session_state.chatbot)}")
+        
         # Add user message
         st.session_state.chat_history.append({
             'role': 'user',
@@ -989,6 +979,8 @@ with col_chat:
             forecast_summary = None
             context = None
         
+        st.write("🚀 DEBUG: About to call chatbot.chat()")
+        
         # Get AI response
         with st.spinner("🤔 Thinking..."):
             try:
@@ -997,7 +989,9 @@ with col_chat:
                     forecast_data=forecast_summary,
                     context=context
                 )
+                st.write(f"🚀 DEBUG: Got response: {response[:100]}...")
             except Exception as e:
+                st.write(f"🚀 DEBUG: Exception caught: {str(e)}")
                 response = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question or contact support if the issue persists."
         
         # Add assistant message
