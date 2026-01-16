@@ -194,6 +194,10 @@ st.markdown("""
     .user-message strong {
         color: white !important;
     }
+    
+    .user-message p {
+        color: white !important;
+    }
 
     .assistant-message {
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -887,22 +891,26 @@ with col_chat:
         """, unsafe_allow_html=True)
     
     # Chat container with scrollable history
+    import html
     chat_html = '<div class="chat-container">'
     
     # Display chat history
     for message in st.session_state.chat_history:
+        # Escape HTML to prevent code from showing
+        content = html.escape(message['content'])
+        
         if message['role'] == 'user':
             chat_html += f"""
             <div class="chat-message user-message">
-                <strong>👤 You</strong>
-                <p>{message['content']}</p>
+                <strong style="color: white;">👤 You</strong>
+                <p style="color: white;">{content}</p>
             </div>
             """
         else:
             chat_html += f"""
             <div class="chat-message assistant-message">
                 <strong>🤖 AI Assistant</strong>
-                <p>{message['content']}</p>
+                <p>{content}</p>
             </div>
             """
     
