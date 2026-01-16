@@ -18,8 +18,8 @@ def main():
     # Install requirements
     subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
     
-    # Install Prophet
-    subprocess.run([sys.executable, "-m", "pip", "install", "prophet==1.1.5"], check=True)
+    # Install Prophet (latest version with Python 3.13 support)
+    subprocess.run([sys.executable, "-m", "pip", "install", "prophet>=1.1.6", "--upgrade"], check=True)
     
     # Install sts package
     subprocess.run([sys.executable, "-m", "pip", "install", "-e", "."], check=True)

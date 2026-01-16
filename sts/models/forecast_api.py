@@ -8,10 +8,15 @@
 import os
 import json
 import pickle
+import logging
 from typing import Optional, Dict, List, Tuple
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
+
+# Suppress Prophet's stan_backend logging issue
+logging.getLogger('prophet').setLevel(logging.ERROR)
+
 from prophet import Prophet
 from prophet.serialize import model_to_json, model_from_json
 
@@ -79,7 +84,7 @@ class ForecastAPI:
         if external_regressors:
             df = add_external_regressors(df, external_regressors)
         
-        # Initialize Prophet model
+        # Initialize Prophet model (v1.1.6+ with Python 3.13 support)
         model = Prophet(
             yearly_seasonality=yearly_seasonality,
             changepoint_prior_scale=changepoint_prior_scale,
