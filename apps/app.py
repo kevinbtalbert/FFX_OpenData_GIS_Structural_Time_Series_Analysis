@@ -50,6 +50,17 @@ st.markdown("""
     /* Global styles */
     html, body, [class*="css"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #1e293b;
+    }
+    
+    /* Ensure all text is readable */
+    p, h1, h2, h3, h4, h5, h6, span, div, label {
+        color: #1e293b !important;
+    }
+    
+    /* Streamlit specific overrides */
+    .stMarkdown, .stText {
+        color: #1e293b !important;
     }
     
     /* Hide Streamlit branding */
@@ -211,11 +222,21 @@ st.markdown("""
         padding: 1rem 1.25rem;
         border-radius: 8px;
         margin: 1rem 0;
+        color: #1e293b;
+    }
+    
+    .info-box h4 {
+        color: #1e293b;
+    }
+    
+    .info-box p, .info-box ol, .info-box li {
+        color: #334155;
     }
     
     .warning-box {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
         border-left: 4px solid #f59e0b;
+        color: #1e293b;
         padding: 1rem 1.25rem;
         border-radius: 8px;
         margin: 1rem 0;
@@ -435,36 +456,38 @@ with st.sidebar:
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("🔄 Train", use_container_width=True, help="Train new model"):
-            with st.spinner("Training model..."):
+        if st.button("🔄 Train", use_container_width=True, help="Train new model", key="train_btn"):
+            with st.spinner("Training model... This may take 30-60 seconds."):
                 try:
                     st.session_state.forecast_api.train_model(
                         district_id=selected_district,
-                        periods_ahead=periods_ahead
+                        periods_ahead=periods_ahead,
+                        yearly_seasonality=10
                     )
-                    st.success("✓ Trained!")
+                    st.success("✓ Model trained successfully!")
+                    st.balloons()
                 except Exception as e:
-                    st.error(f"Error: {str(e)[:50]}")
+                    st.error(f"❌ Training failed: {str(e)}")
+                    import traceback
+                    st.code(traceback.format_exc())
     
     with col2:
-        if st.button("📊 Forecast", use_container_width=True, help="Generate forecast"):
-            with st.spinner("Forecasting..."):
+        if st.button("📊 Forecast", use_container_width=True, help="Generate forecast", key="forecast_btn"):
+            with st.spinner("Generating forecast..."):
                 try:
                     st.session_state.forecast_api.generate_forecast(
                         district_id=selected_district,
                         periods_ahead=periods_ahead,
                         freq='MS'
                     )
-                    st.success("✓ Generated!")
+                    st.success("✓ Forecast generated successfully!")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Error: {str(e)[:50]}")
-    
-    st.markdown("---")
-    
-    # Theme toggle
-    st.markdown("#### 🎨 Appearance")
-    theme_toggle = st.toggle("Dark Mode", value=False)
+                    st.error(f"❌ Forecast failed: {str(e)}")
+                    st.info("💡 Tip: Make sure to train the model first using the 🔄 Train button.")
+                    import traceback
+                    with st.expander("Show error details"):
+                        st.code(traceback.format_exc())
     
     st.markdown("---")
     

@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 from prophet import Prophet
+from prophet.serialize import model_to_json, model_from_json
 
 from sts.data.fairfax_loader import (
     load_district_data,
@@ -262,18 +263,18 @@ class ForecastAPI:
         return models
     
     def _save_model(self, model: Prophet, model_key: str):
-        """Save model to disk."""
-        filepath = os.path.join(self.models_dir, f'{model_key}_model.pkl')
-        with open(filepath, 'wb') as f:
-            pickle.dump(model, f)
+        """Save model to disk using JSON serialization (Prophet 1.1+)."""
+        filepath = os.path.join(self.models_dir, f'{model_key}_model.json')
+        with open(filepath, 'w') as f:
+            json.dump(model_to_json(model), f)
         print(f"Model saved to {filepath}")
     
     def _load_model(self, model_key: str) -> Optional[Prophet]:
-        """Load model from disk."""
-        filepath = os.path.join(self.models_dir, f'{model_key}_model.pkl')
+        """Load model from disk using JSON serialization (Prophet 1.1+)."""
+        filepath = os.path.join(self.models_dir, f'{model_key}_model.json')
         if os.path.exists(filepath):
-            with open(filepath, 'rb') as f:
-                return pickle.load(f)
+            with open(filepath, 'r') as f:
+                return model_from_json(json.load(f))
         return None
     
     def _save_forecast(self, forecast: pd.DataFrame, model_key: str):
