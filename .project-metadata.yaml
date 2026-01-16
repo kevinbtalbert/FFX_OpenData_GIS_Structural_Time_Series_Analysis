@@ -20,9 +20,9 @@ environment_variables:
     description: "Azure OpenAI API key (will use mock chatbot if not provided)"
     prompt_user: true
   AZURE_OPENAI_DEPLOYMENT:
-    default: "gpt-4"
-    description: "Azure OpenAI model deployment name (check your Azure portal for exact name)"
-    prompt_user: true
+    default: "gpt-4o"
+    description: "Azure OpenAI model deployment name"
+    prompt_user: false
   AZURE_OPENAI_API_VERSION:
     default: "2024-02-15-preview"
     description: "Azure OpenAI API version"

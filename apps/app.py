@@ -99,41 +99,49 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: transform 0.2s, box-shadow 0.2s;
         border: 1px solid rgba(255, 255, 255, 0.1);
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
-    
+
     .metric-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
     }
-    
+
     .metric-value {
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: 700;
         color: #ffffff !important;
         margin: 0.5rem 0;
         font-family: 'JetBrains Mono', monospace;
+        word-break: break-word;
+        line-height: 1.2;
     }
-    
+
     .metric-label {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         color: #e2e8f0 !important;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        line-height: 1.3;
     }
-    
+
     .metric-delta {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
         margin-top: 0.5rem;
+        color: #ffffff !important;
     }
-    
+
     .metric-delta.positive {
-        color: #10b981;
+        color: #10b981 !important;
     }
-    
+
     .metric-delta.negative {
-        color: #ef4444;
+        color: #ef4444 !important;
     }
     
     /* Section headers */
@@ -154,43 +162,60 @@ st.markdown("""
         padding: 1.5rem;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         border: 1px solid #e2e8f0;
-        height: 600px;
+        max-height: 500px;
+        min-height: 500px;
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
     }
-    
+
     .chat-message {
         padding: 1rem 1.25rem;
         border-radius: 12px;
-        margin: 0.75rem 0;
         max-width: 85%;
         animation: fadeIn 0.3s ease-in;
+        word-wrap: break-word;
     }
-    
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
+
     .user-message {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        color: white !important;
         margin-left: auto;
         text-align: right;
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
-    
+
+    .user-message strong {
+        color: white !important;
+    }
+
     .assistant-message {
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        color: #1e293b;
+        color: #1e293b !important;
         margin-right: auto;
         border: 1px solid #cbd5e1;
     }
-    
+
+    .assistant-message strong {
+        color: #1e293b !important;
+    }
+
     .chat-message strong {
         display: block;
         margin-bottom: 0.5rem;
         font-size: 0.85rem;
-        opacity: 0.9;
+        font-weight: 700;
+    }
+
+    .chat-message p {
+        margin: 0;
+        line-height: 1.5;
     }
     
     /* Sidebar styling */
@@ -222,32 +247,34 @@ st.markdown("""
         padding: 1rem 1.25rem;
         border-radius: 8px;
         margin: 1rem 0;
-        color: #1e293b;
     }
-    
-    .info-box h4 {
-        color: #1e293b;
+
+    .info-box * {
+        color: #1e293b !important;
     }
-    
-    .info-box p, .info-box ol, .info-box li {
-        color: #334155;
-    }
-    
+
     .warning-box {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
         border-left: 4px solid #f59e0b;
-        color: #1e293b;
         padding: 1rem 1.25rem;
         border-radius: 8px;
         margin: 1rem 0;
     }
-    
+
+    .warning-box * {
+        color: #1e293b !important;
+    }
+
     .success-box {
         background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
         border-left: 4px solid #10b981;
         padding: 1rem 1.25rem;
         border-radius: 8px;
         margin: 1rem 0;
+    }
+
+    .success-box * {
+        color: #1e293b !important;
     }
     
     /* Suggested questions */
@@ -800,27 +827,28 @@ with col_chat:
         </div>
         """, unsafe_allow_html=True)
     
-    # Chat container
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    # Chat container with scrollable history
+    chat_html = '<div class="chat-container">'
     
     # Display chat history
     for message in st.session_state.chat_history:
         if message['role'] == 'user':
-            st.markdown(f"""
+            chat_html += f"""
             <div class="chat-message user-message">
                 <strong>👤 You</strong>
-                {message['content']}
+                <p>{message['content']}</p>
             </div>
-            """, unsafe_allow_html=True)
+            """
         else:
-            st.markdown(f"""
+            chat_html += f"""
             <div class="chat-message assistant-message">
                 <strong>🤖 AI Assistant</strong>
-                {message['content']}
+                <p>{message['content']}</p>
             </div>
-            """, unsafe_allow_html=True)
+            """
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    chat_html += '</div>'
+    st.markdown(chat_html, unsafe_allow_html=True)
     
     # Suggested questions
     with st.expander("💡 Suggested Questions", expanded=True):
