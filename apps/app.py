@@ -343,9 +343,19 @@ st.markdown("""
 
 if 'chatbot' not in st.session_state:
     try:
-        st.session_state.chatbot = create_chatbot(use_mock=False)
-        st.session_state.using_mock = False
-    except:
+        # Try to create real chatbot with Azure OpenAI
+        azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+        azure_key = os.getenv('AZURE_OPENAI_API_KEY')
+        
+        if azure_endpoint and azure_key:
+            st.session_state.chatbot = create_chatbot(use_mock=False)
+            st.session_state.using_mock = False
+        else:
+            # No credentials, use mock
+            st.session_state.chatbot = create_chatbot(use_mock=True)
+            st.session_state.using_mock = True
+    except Exception as e:
+        # Fallback to mock on any error
         st.session_state.chatbot = create_chatbot(use_mock=True)
         st.session_state.using_mock = True
 
@@ -581,52 +591,63 @@ with col_dashboard:
         # Create advanced Plotly chart
         fig = go.Figure()
         
-        # Historical data
-        historical = forecast_plot[forecast_plot['ds'] < datetime.now()]
-        if len(historical) > 0:
-            fig.add_trace(go.Scatter(
-                x=historical['ds'],
-                y=historical['yhat'],
-                mode='lines',
-                name='Historical',
-                line=dict(color='#667eea', width=3),
-                hovertemplate='<b>Date:</b> %{x|%Y-%m-%d}<br><b>Value:</b> $%{y:,.0f}<extra></extra>'
-            ))
+        # Add current value as starting point
+        base_date = datetime(forecast_summary['base_year'], 1, 1)
+        base_value = forecast_summary['base_value']
         
-        # Future forecast
-        future = forecast_plot[forecast_plot['ds'] >= datetime.now()]
-        if len(future) > 0:
-            # Forecast line
-            fig.add_trace(go.Scatter(
-                x=future['ds'],
-                y=future['yhat'],
-                mode='lines',
-                name='Forecast',
-                line=dict(color='#f59e0b', width=3, dash='dash'),
-                hovertemplate='<b>Date:</b> %{x|%Y-%m-%d}<br><b>Predicted:</b> $%{y:,.0f}<extra></extra>'
-            ))
-            
-            # Confidence interval
-            fig.add_trace(go.Scatter(
-                x=future['ds'],
-                y=future['yhat_upper'],
-                mode='lines',
-                name=f'Upper Bound ({confidence_level}%)',
-                line=dict(width=0),
-                showlegend=False,
-                hoverinfo='skip'
-            ))
-            
-            fig.add_trace(go.Scatter(
-                x=future['ds'],
-                y=future['yhat_lower'],
-                mode='lines',
-                name=f'Confidence Interval ({confidence_level}%)',
-                line=dict(width=0),
-                fillcolor='rgba(245, 158, 11, 0.2)',
-                fill='tonexty',
-                hovertemplate='<b>Range:</b> $%{y:,.0f}<extra></extra>'
-            ))
+        # Current value point
+        fig.add_trace(go.Scatter(
+            x=[base_date],
+            y=[base_value],
+            mode='markers',
+            name='Current Value (2025)',
+            marker=dict(size=12, color='#667eea', symbol='circle'),
+            hovertemplate='<b>Current Value</b><br><b>Date:</b> Jan 2025<br><b>Value:</b> $%{y:,.0f}<extra></extra>'
+        ))
+        
+        # Connecting line from current to first projection
+        fig.add_trace(go.Scatter(
+            x=[base_date, forecast_plot['ds'].iloc[0]],
+            y=[base_value, forecast_plot['yhat'].iloc[0]],
+            mode='lines',
+            name='Transition',
+            line=dict(color='#94a3b8', width=2, dash='dot'),
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+        
+        # Projected values
+        fig.add_trace(go.Scatter(
+            x=forecast_plot['ds'],
+            y=forecast_plot['yhat'],
+            mode='lines+markers',
+            name='Projected Growth',
+            line=dict(color='#10b981', width=3),
+            marker=dict(size=8, color='#10b981'),
+            hovertemplate='<b>Projection</b><br><b>Date:</b> %{x|%b %Y}<br><b>Value:</b> $%{y:,.0f}<extra></extra>'
+        ))
+        
+        # Confidence interval
+        fig.add_trace(go.Scatter(
+            x=forecast_plot['ds'],
+            y=forecast_plot['yhat_upper'],
+            mode='lines',
+            name=f'Upper Bound ({confidence_level}%)',
+            line=dict(width=0),
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=forecast_plot['ds'],
+            y=forecast_plot['yhat_lower'],
+            mode='lines',
+            name=f'Confidence Interval ({confidence_level}%)',
+            line=dict(width=0),
+            fillcolor='rgba(16, 185, 129, 0.15)',
+            fill='tonexty',
+            hovertemplate='<b>Range:</b> $%{y:,.0f}<extra></extra>'
+        ))
         
         fig.update_layout(
             title=dict(
@@ -649,6 +670,38 @@ with col_dashboard:
         )
         
         st.plotly_chart(fig, width='stretch')
+        
+        # AI EXPLANATION SECTION
+        st.markdown("#### 🤖 AI Analysis")
+        with st.spinner("Generating AI explanation..."):
+            try:
+                # Generate AI explanation of the forecast
+                explanation_prompt = f"""Provide a brief executive summary (2-3 sentences) of this forecast:
+                
+- Current Value: ${forecast_summary['base_value']:,.0f}
+- Projected Value (6 months): ${forecast_summary['final_predicted_value']:,.0f}
+- Growth: {forecast_summary['total_growth_pct']:.2f}%
+- Properties: {forecast_summary['property_count']:,}
+- District: {selected_district if selected_district else 'County Total'}
+
+Focus on: What does this mean for revenue planning? Any concerns or opportunities?"""
+                
+                ai_explanation = st.session_state.chatbot.chat(
+                    explanation_prompt,
+                    forecast_data=forecast_summary
+                )
+                
+                st.markdown(f"""
+                <div class="info-box">
+                    <p style="margin: 0; line-height: 1.6;">{ai_explanation}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            except Exception as e:
+                st.info("💡 **Quick Summary:** " + 
+                       f"The forecast projects {'growth' if forecast_summary['total_growth_pct'] > 0 else 'decline'} " +
+                       f"of {abs(forecast_summary['total_growth_pct']):.1f}% over the next 6 months, " +
+                       f"from ${forecast_summary['base_value']/1e9:.2f}B to ${forecast_summary['final_predicted_value']/1e9:.2f}B. " +
+                       f"This represents a {'positive' if forecast_summary['total_growth_pct'] > 0 else 'negative'} trend for revenue planning.")
         
         # RISK ASSESSMENT SECTION
         st.markdown("#### Revenue Risk Assessment")
@@ -817,11 +870,14 @@ with col_chat:
         
         # Get AI response
         with st.spinner("🤔 Thinking..."):
-            response = st.session_state.chatbot.chat(
-                user_input,
-                forecast_data=forecast_summary,
-                context=context
-            )
+            try:
+                response = st.session_state.chatbot.chat(
+                    user_input,
+                    forecast_data=forecast_summary,
+                    context=context
+                )
+            except Exception as e:
+                response = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question or contact support if the issue persists."
         
         # Add assistant message
         st.session_state.chat_history.append({
