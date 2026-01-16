@@ -21,22 +21,22 @@ if sys.version_info < (3, 13):
 # No manual configuration needed - they're automatically available
 
 # Launch Streamlit app
-port = os.getenv('CDSW_APP_PORT', '8501')
+# CML sets CDSW_APP_PORT for applications
+port = int(os.getenv('CDSW_APP_PORT', '8090'))
 
-print("🚀 Launching Fairfax County Real Estate Forecast (Enhanced UI)...")
-print(f"📍 Port: {port}")
+print("🚀 Launching Fairfax County Real Estate Forecast...")
+print(f"📍 Binding to port: {port}")
 print(f"🐍 Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
 print()
 
-subprocess.run([
+# Use exec to replace the process (important for CML/CDSW)
+os.execvp('streamlit', [
     'streamlit',
     'run',
     'apps/app.py',
-    '--server.port', port,
+    '--server.port', str(port),
     '--server.address', '0.0.0.0',
-    '--theme.base', 'light',
-    '--theme.primaryColor', '#667eea',
-    '--theme.backgroundColor', '#ffffff',
-    '--theme.secondaryBackgroundColor', '#f8fafc',
-    '--theme.textColor', '#1e293b'
+    '--server.headless', 'true',
+    '--server.enableCORS', 'false',
+    '--server.enableXsrfProtection', 'false'
 ])
