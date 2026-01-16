@@ -12,7 +12,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from sts.models.forecast_api import ForecastAPI, get_forecast_summary
+from sts.models.projection_api import ProjectionAPI, get_forecast_summary
 from sts.data.fairfax_loader import get_available_districts, get_district_summary
 from sts.ai.chatbot import create_chatbot
 
@@ -39,7 +39,7 @@ def example_2_train_and_forecast():
     print("="*70 + "\n")
     
     # Initialize API
-    api = ForecastAPI()
+    api = ProjectionAPI()
     
     # Get a district to work with
     districts = get_available_districts()
@@ -56,7 +56,7 @@ def example_2_train_and_forecast():
         model = api.train_model(
             district_id=test_district,
             periods_ahead=6,
-            yearly_seasonality=10
+            growth_rate=0.03
         )
         print("✓ Model trained successfully")
     except Exception as e:
@@ -68,8 +68,7 @@ def example_2_train_and_forecast():
     try:
         forecast = api.generate_forecast(
             district_id=test_district,
-            periods_ahead=6,
-            freq='MS'  # Month start
+            periods_ahead=6
         )
         print("✓ Forecast generated successfully")
         print(f"\nForecast shape: {forecast.shape}")
@@ -138,7 +137,7 @@ def example_5_train_multiple_districts():
     print("Example 5: Train Multiple District Models")
     print("="*70 + "\n")
     
-    api = ForecastAPI()
+    api = ProjectionAPI()
     
     # Train models for top 3 districts
     print("Training models for top 3 districts...")
@@ -155,7 +154,7 @@ def example_6_county_level_forecast():
     print("Example 6: County-Level Forecast")
     print("="*70 + "\n")
     
-    api = ForecastAPI()
+    api = ProjectionAPI()
     
     # Train county-level model (district_id=None)
     print("Training county-level model...")

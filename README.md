@@ -144,13 +144,13 @@ Download from [Fairfax County Open Data](https://data.fairfaxcounty.gov/)
 The application exposes a Python API for programmatic access:
 
 ```python
-from sts.models.forecast_api import ForecastAPI, get_forecast_summary
+from sts.models.projection_api import ProjectionAPI, get_forecast_summary
 
 # Initialize API
-api = ForecastAPI()
+api = ProjectionAPI()
 
 # Train a model
-model = api.train_model(district_id='0804', periods_ahead=6)
+model = api.train_model(district_id='0804', periods_ahead=6, growth_rate=0.03)
 
 # Generate forecast
 forecast = api.generate_forecast(district_id='0804', periods_ahead=6)

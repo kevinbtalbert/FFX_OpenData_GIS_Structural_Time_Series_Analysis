@@ -462,7 +462,7 @@ with st.sidebar:
                     st.session_state.forecast_api.train_model(
                         district_id=selected_district,
                         periods_ahead=periods_ahead,
-                        yearly_seasonality=10
+                        growth_rate=0.03
                     )
                     st.success("✓ Model trained successfully!")
                     st.balloons()
@@ -477,8 +477,7 @@ with st.sidebar:
                 try:
                     st.session_state.forecast_api.generate_forecast(
                         district_id=selected_district,
-                        periods_ahead=periods_ahead,
-                        freq='MS'
+                        periods_ahead=periods_ahead
                     )
                     st.success("✓ Forecast generated successfully!")
                     st.rerun()
@@ -497,7 +496,7 @@ with st.sidebar:
     <div style='font-size: 0.85rem; color: #64748b;'>
     <strong>Version:</strong> 3.0.0<br>
     <strong>Python:</strong> 3.13+<br>
-    <strong>Model:</strong> Prophet<br>
+    <strong>Model:</strong> Growth Projections<br>
     <strong>AI:</strong> Azure OpenAI
     </div>
     """, unsafe_allow_html=True)
@@ -840,7 +839,7 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #64748b; font-size: 0.9rem; padding: 1rem 0;'>
     <strong>Fairfax County Real Estate Forecast</strong> | Version 3.0.0 | Python 3.13+ | 
-    Powered by Prophet & Azure OpenAI | 
+    Powered by Growth Projections & Azure OpenAI | 
     <a href='https://github.com/fairfaxcounty/real-estate-forecast' style='color: #667eea;'>GitHub</a>
 </div>
 """, unsafe_allow_html=True)

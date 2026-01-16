@@ -168,7 +168,7 @@ def main():
         print("✅ All checks passed! You're ready to go.")
         print("\nNext steps:")
         print("  1. Launch the app: streamlit run apps/app.py")
-        print("  2. Or use the API: python3 -c 'from sts.models.forecast_api import ForecastAPI'")
+        print("  2. Or use the API: python3 -c 'from sts.models.projection_api import ProjectionAPI'")
         print("\nFor more information, see README.md or START_HERE.md")
     else:
         print("⚠ Some checks failed, but continuing with deployment.")
