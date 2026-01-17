@@ -40,7 +40,8 @@ class ProjectionAPI:
         self,
         district_id: Optional[str] = None,
         periods_ahead: int = 6,
-        growth_rate: float = 0.03
+        growth_rate: float = 0.03,
+        confidence_interval_pct: float = 0.05
     ):
         """
         Train a projection model for a district or county-wide.
@@ -58,7 +59,11 @@ class ProjectionAPI:
         model.fit(self.df, district_id=district_id)
         
         # Generate projections
-        projections = model.project(periods=periods_ahead, frequency='M')
+        projections = model.project(
+            periods=periods_ahead,
+            frequency='M',
+            confidence_interval_pct=confidence_interval_pct
+        )
         
         # Store
         self.models[model_key] = model
@@ -74,7 +79,8 @@ class ProjectionAPI:
         self,
         district_id: Optional[str] = None,
         periods_ahead: int = 6,
-        growth_rate: float = 0.03
+        growth_rate: float = 0.03,
+        confidence_interval_pct: float = 0.05
     ) -> pd.DataFrame:
         """
         Generate forecast/projection.
@@ -92,7 +98,7 @@ class ProjectionAPI:
         # Check if model exists
         if model_key not in self.models:
             # Train if not exists
-            self.train_model(district_id, periods_ahead, growth_rate)
+            self.train_model(district_id, periods_ahead, growth_rate, confidence_interval_pct)
         
         return self.projections[model_key]
     
@@ -144,6 +150,7 @@ class ProjectionAPI:
                 'predicted_value': float(row['yhat']),
                 'lower_bound': float(row['yhat_lower']),
                 'upper_bound': float(row['yhat_upper']),
+                'confidence_interval': float(row.get('confidence_interval', 0.05)),
                 'period': int(row['period'])
             })
         
@@ -155,6 +162,7 @@ class ProjectionAPI:
             'mean_value': float(model.mean_value),
             'median_value': float(model.median_value),
             'growth_rate': float(model.base_growth_rate),
+            'confidence_interval_pct': float(predictions[0]['confidence_interval']) if predictions else 0.05,
             'periods': len(predictions),
             'total_predicted_value': float(forecast['yhat'].sum()),
             'mean_predicted_value': float(forecast['yhat'].mean()),

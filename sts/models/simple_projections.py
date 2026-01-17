@@ -50,7 +50,12 @@ class SimpleProjectionModel:
         
         return self
     
-    def project(self, periods: int = 6, frequency: str = 'M') -> pd.DataFrame:
+    def project(
+        self,
+        periods: int = 6,
+        frequency: str = 'M',
+        confidence_interval_pct: float = 0.05
+    ) -> pd.DataFrame:
         """
         Generate projections for future periods.
         
@@ -76,21 +81,18 @@ class SimpleProjectionModel:
             dates = [base_date + relativedelta(years=i) for i in range(1, periods + 1)]
             growth_factors = [(1 + self.base_growth_rate) ** i for i in range(1, periods + 1)]
         
-        # Generate projections
+        # Generate projections (deterministic, no random variance)
         projections = []
         for date, factor in zip(dates, growth_factors):
             projected_value = self.total_value * factor
-            
-            # Add some realistic variance
-            variance = np.random.normal(0, 0.01)  # ±1% variance
-            projected_value *= (1 + variance)
-            
+           
             projections.append({
                 'ds': date,
                 'yhat': projected_value,
-                'yhat_lower': projected_value * 0.95,  # 95% confidence interval
-                'yhat_upper': projected_value * 1.05,
+                'yhat_lower': projected_value * (1 - confidence_interval_pct),
+                'yhat_upper': projected_value * (1 + confidence_interval_pct),
                 'growth_rate': self.base_growth_rate,
+                'confidence_interval': confidence_interval_pct,
                 'period': len(projections) + 1
             })
         

@@ -597,6 +597,39 @@ with st.sidebar:
         value=95,
         format_func=lambda x: f"{x}%"
     )
+
+    growth_rate_pct = st.slider(
+        "Assumed Annual Growth Rate (%)",
+        min_value=0.0,
+        max_value=8.0,
+        value=3.0,
+        step=0.1,
+        help="Deterministic assumption used for projections"
+    )
+
+    uncertainty_band_pct = st.slider(
+        "Assumed Uncertainty Band (+/- %)",
+        min_value=1.0,
+        max_value=10.0,
+        value=5.0,
+        step=0.5,
+        help="Applied symmetrically to create lower/upper bounds"
+    )
+
+    st.markdown(
+        f"""
+        <div class="info-box" style="font-size: 0.85rem;">
+            <strong>Model Assumptions (Current Data Constraint)</strong><br>
+            <ul style="margin: 0.5rem 0 0 1.1rem;">
+                <li>Only one tax year is available, so this is a deterministic projection, not a trained time-series forecast.</li>
+                <li>Projected values apply a fixed annual growth rate of {growth_rate_pct:.1f}% compounded monthly.</li>
+                <li>Uncertainty bands are symmetric at +/- {uncertainty_band_pct:.1f}% around each projected value.</li>
+                <li>Results are repeatable: identical inputs produce identical outputs.</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
     st.markdown("---")
     
@@ -612,7 +645,8 @@ with st.sidebar:
                     st.session_state.forecast_api.train_model(
                         district_id=selected_district,
                         periods_ahead=periods_ahead,
-                        growth_rate=0.03
+                        growth_rate=growth_rate_pct / 100.0,
+                        confidence_interval_pct=uncertainty_band_pct / 100.0
                     )
                     st.success(" Model trained successfully!")
                     st.balloons()
@@ -627,7 +661,9 @@ with st.sidebar:
                 try:
                     st.session_state.forecast_api.generate_forecast(
                         district_id=selected_district,
-                        periods_ahead=periods_ahead
+                        periods_ahead=periods_ahead,
+                        growth_rate=growth_rate_pct / 100.0,
+                        confidence_interval_pct=uncertainty_band_pct / 100.0
                     )
                     st.success(" Forecast generated successfully!")
                     st.rerun()
@@ -772,7 +808,7 @@ with col_dashboard:
             x=forecast_plot['ds'],
             y=forecast_plot['yhat_upper'],
             mode='lines',
-            name=f'Upper Bound ({confidence_level}%)',
+            name=f'Upper Bound (+/- {uncertainty_band_pct:.1f}%)',
             line=dict(width=0),
             showlegend=False,
             hoverinfo='skip'
@@ -782,7 +818,7 @@ with col_dashboard:
             x=forecast_plot['ds'],
             y=forecast_plot['yhat_lower'],
             mode='lines',
-            name=f'Confidence Interval ({confidence_level}%)',
+            name=f'Uncertainty Band (+/- {uncertainty_band_pct:.1f}%)',
             line=dict(width=0),
             fillcolor='rgba(16, 185, 129, 0.15)',
             fill='tonexty',
@@ -821,6 +857,8 @@ with col_dashboard:
 - Current Value: ${forecast_summary['base_value']:,.0f}
 - Projected Value (6 months): ${forecast_summary['final_predicted_value']:,.0f}
 - Growth: {forecast_summary['total_growth_pct']:.2f}%
+- Assumed Annual Growth Rate: {growth_rate_pct:.1f}%
+- Assumed Uncertainty Band: +/- {uncertainty_band_pct:.1f}%
 - Properties: {forecast_summary['property_count']:,}
 - District: {selected_district if selected_district else 'County Total'}
 
@@ -864,7 +902,7 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
                     ${downside_risk/1e6:.1f}M
                 </div>
                 <div style="font-size: 0.9rem; margin-top: 0.5rem;">
-                    Potential revenue loss at {confidence_level}% confidence (-{downside_pct:.1f}%)
+                    Potential revenue loss with +/- {uncertainty_band_pct:.1f}% band (-{downside_pct:.1f}%)
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -881,7 +919,7 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
                     ${upside_potential/1e6:.1f}M
                 </div>
                 <div style="font-size: 0.9rem; margin-top: 0.5rem;">
-                    Potential revenue gain at {confidence_level}% confidence (+{upside_pct:.1f}%)
+                    Potential revenue gain with +/- {uncertainty_band_pct:.1f}% band (+{upside_pct:.1f}%)
                 </div>
             </div>
             """, unsafe_allow_html=True)
