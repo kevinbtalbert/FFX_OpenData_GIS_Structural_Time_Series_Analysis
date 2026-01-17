@@ -942,14 +942,10 @@ with col_chat:
     
     chat_html = '<div class="chat-container">'
     
-    # Display chat history - strip ALL HTML tags from content and escape for safe display
-    import html as html_module
-    
+    # Display chat history - strip ALL HTML tags from content
     for message in st.session_state.chat_history:
         # Completely strip all HTML tags
         clean_content = strip_html_tags(message['content'])
-        # Escape any remaining special characters for safe HTML display
-        clean_content = html_module.escape(clean_content)
         
         if message['role'] == 'user':
             chat_html += f"""
