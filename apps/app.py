@@ -80,6 +80,10 @@ st.markdown("""
         color: white;
     }
     
+    .main-header * {
+        color: #ffffff !important;
+    }
+    
     .main-header h1 {
         font-size: 2.8rem;
         font-weight: 700;
