@@ -406,7 +406,7 @@ try:
             def chat(self, user_message, forecast_data=None, context=None, **kwargs):
                 try:
                     messages = [
-                        {"role": "system", "content": "You are an AI assistant for Fairfax County real estate forecasting. Provide concise, executive-focused insights about property values, trends, and revenue risks."}
+                        {"role": "system", "content": "You are an AI assistant for Fairfax County real estate forecasting. Provide concise, executive-focused insights about property values, trends, and revenue risks. IMPORTANT: Respond with PLAIN TEXT ONLY. Do not use HTML tags, markdown, or any formatting. Just provide clear, readable text."}
                     ]
                     
                     if forecast_data:
@@ -778,7 +778,7 @@ with col_dashboard:
         with st.spinner("Generating AI explanation..."):
             try:
                 # Generate AI explanation of the forecast
-                explanation_prompt = f"""Provide a brief executive summary (2-3 sentences) of this forecast:
+                explanation_prompt = f"""Provide a brief executive summary (2-3 sentences) of this forecast in PLAIN TEXT (no HTML, no markdown):
                 
 - Current Value: ${forecast_summary['base_value']:,.0f}
 - Projected Value (6 months): ${forecast_summary['final_predicted_value']:,.0f}
@@ -786,7 +786,7 @@ with col_dashboard:
 - Properties: {forecast_summary['property_count']:,}
 - District: {selected_district if selected_district else 'County Total'}
 
-Focus on: What does this mean for revenue planning? Any concerns or opportunities?"""
+Focus on: What does this mean for revenue planning? Any concerns or opportunities? Respond in plain text only."""
                 
                 ai_explanation = st.session_state.chatbot.chat(
                     explanation_prompt,
