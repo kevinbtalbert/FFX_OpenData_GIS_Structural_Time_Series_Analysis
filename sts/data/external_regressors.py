@@ -280,4 +280,4 @@ if __name__ == '__main__':
     print(f"Interpolated CPI for {len(target_dates)} dates")
     print(interpolated_cpi.head())
     
-    print("\n✓ External regressor module ready for Phase 2 implementation!")
+    print("\n External regressor module ready for Phase 2 implementation!")

@@ -32,16 +32,16 @@ def main():
         import streamlit as st
         import plotly
         from sklearn import linear_model
-        print("✓ All core packages installed successfully!")
+        print(" All core packages installed successfully!")
     except ImportError as e:
-        print(f"✗ Import error: {e}")
+        print(f" Import error: {e}")
         sys.exit(1)
     
     # Create necessary directories
     os.makedirs('data/models', exist_ok=True)
     os.makedirs('data/forecasts', exist_ok=True)
     os.makedirs('data/regressors', exist_ok=True)
-    print("✓ Data directories created")
+    print(" Data directories created")
     
     # Validate CSV files
     csv_dir = 'csvs'
@@ -53,9 +53,9 @@ def main():
         filepath = os.path.join(csv_dir, filename)
         if os.path.exists(filepath):
             size_mb = os.path.getsize(filepath) / (1024 * 1024)
-            print(f"✓ Found {filename} ({size_mb:.1f} MB)")
+            print(f" Found {filename} ({size_mb:.1f} MB)")
         else:
-            print(f"⚠ Warning: {filename} not found in csvs/ directory")
+            print(f" Warning: {filename} not found in csvs/ directory")
     
     print("\n" + "=" * 60)
     print("Installation complete! Ready to launch application.")

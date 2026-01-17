@@ -58,9 +58,9 @@ def example_2_train_and_forecast():
             periods_ahead=6,
             growth_rate=0.03
         )
-        print("✓ Model trained successfully")
+        print(" Model trained successfully")
     except Exception as e:
-        print(f"✗ Error training model: {e}")
+        print(f" Error training model: {e}")
         return
     
     # Generate forecast
@@ -70,11 +70,11 @@ def example_2_train_and_forecast():
             district_id=test_district,
             periods_ahead=6
         )
-        print("✓ Forecast generated successfully")
+        print(" Forecast generated successfully")
         print(f"\nForecast shape: {forecast.shape}")
         print(f"Columns: {forecast.columns.tolist()}")
     except Exception as e:
-        print(f"✗ Error generating forecast: {e}")
+        print(f" Error generating forecast: {e}")
         return
 
 def example_3_get_forecast_summary():
@@ -143,10 +143,10 @@ def example_5_train_multiple_districts():
     print("Training models for top 3 districts...")
     try:
         models = api.train_all_districts(top_n=3, periods_ahead=6)
-        print(f"\n✓ Successfully trained {len(models)} models")
+        print(f"\n Successfully trained {len(models)} models")
         print(f"Districts: {list(models.keys())}")
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f" Error: {e}")
 
 def example_6_county_level_forecast():
     """Example 6: County-level (aggregate) forecast."""
@@ -160,18 +160,18 @@ def example_6_county_level_forecast():
     print("Training county-level model...")
     try:
         model = api.train_model(district_id=None, periods_ahead=6)
-        print("✓ Model trained")
+        print(" Model trained")
         
         # Generate forecast
         forecast = api.generate_forecast(district_id=None, periods_ahead=6)
-        print("✓ Forecast generated")
+        print(" Forecast generated")
         
         # Get summary
         summary = api.get_forecast_summary(district_id=None, periods_ahead=6)
         print(f"\nCounty-wide total predicted value: ${summary['total_predicted_value']:,.0f}")
         
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f" Error: {e}")
 
 def main():
     """Run all examples."""
@@ -198,7 +198,7 @@ def main():
         try:
             func()
         except Exception as e:
-            print(f"\n✗ Example '{name}' failed: {e}")
+            print(f"\n Example '{name}' failed: {e}")
     
     print("\n" + "="*70)
     print("  Examples Complete!")

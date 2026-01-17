@@ -1,4 +1,4 @@
-# 🏘️ Fairfax County Real Estate Forecast
+#  Fairfax County Real Estate Forecast
 
 **AI-Powered Property Value Predictions with Strategic Insights**
 
@@ -10,8 +10,8 @@ Version 3.0 | Python 3.13+ | Modern UI
 
 A beautiful, dual-mode application for forecasting Fairfax County real estate values:
 
-- **📊 Visual Dashboard (60%)**: Interactive charts, metrics, and risk analysis
-- **💬 AI Assistant (40%)**: Azure OpenAI-powered chatbot for executive Q&A
+- ** Visual Dashboard (60%)**: Interactive charts, metrics, and risk analysis
+- ** AI Assistant (40%)**: Azure OpenAI-powered chatbot for executive Q&A
 
 Built with Prophet for time series forecasting and featuring a stunning modern UI with gradients, animations, and dark mode support.
 
@@ -19,9 +19,9 @@ Built with Prophet for time series forecasting and featuring a stunning modern U
 
 This tool provides **actionable intelligence** for critical technology decisions:
 
-- **💰 Budget Defense**: Predict revenue declines early, justify automation investments before cuts hit
-- **🏗️ Infrastructure Planning**: Deploy fiber and smart city sensors where growth is happening
-- **🏛️ Service Delivery**: Scale capacity proactively for demographic shifts and service surges
+- ** Budget Defense**: Predict revenue declines early, justify automation investments before cuts hit
+- ** Infrastructure Planning**: Deploy fiber and smart city sensors where growth is happening
+- ** Service Delivery**: Scale capacity proactively for demographic shifts and service surges
 
 **See [USE_CASES.md](cursor/USE_CASES.md) for detailed scenarios and ROI examples.**
 
@@ -52,8 +52,8 @@ The app opens at `http://localhost:8501`
 ### 3. Use the Application
 
 1. Select "County Total" or a specific district
-2. Click **🔄 Train** to train the model (~30 seconds)
-3. Click **📊 Forecast** to generate predictions
+2. Click ** Train** to train the model (~30 seconds)
+3. Click ** Forecast** to generate predictions
 4. Explore the dashboard and ask the AI assistant questions!
 
 ---
@@ -117,24 +117,24 @@ Download from [Fairfax County Open Data](https://data.fairfaxcounty.gov/)
 
 ```
 .
-├── apps/
-│   ├── app.py              # Main application
-│   └── launch.py           # Launcher script
-├── sts/
-│   ├── data/
-│   │   ├── fairfax_loader.py      # Data loading
-│   │   └── external_regressors.py # Phase 2 support
-│   ├── models/
-│   │   └── forecast_api.py        # Forecasting API
-│   └── ai/
-│       └── chatbot.py             # AI assistant
-├── scripts/
-│   └── setup_environment.py       # Setup validation
-├── csvs/                          # Your data files
-├── config.example.env             # Configuration template
-├── requirements.txt               # Dependencies
-├── setup.py                       # Package setup
-└── README.md                      # This file
+ apps/
+    app.py              # Main application
+    launch.py           # Launcher script
+ sts/
+    data/
+       fairfax_loader.py      # Data loading
+       external_regressors.py # Phase 2 support
+    models/
+       forecast_api.py        # Forecasting API
+    ai/
+        chatbot.py             # AI assistant
+ scripts/
+    setup_environment.py       # Setup validation
+ csvs/                          # Your data files
+ config.example.env             # Configuration template
+ requirements.txt               # Dependencies
+ setup.py                       # Package setup
+ README.md                      # This file
 ```
 
 ---
@@ -247,17 +247,17 @@ Implementation ready in `sts/data/external_regressors.py`
 
 **See [USE_CASES.md](USE_CASES.md) for detailed examples:**
 
-1. **Budget Defense Plan** 💰
+1. **Budget Defense Plan** 
    - Predict 4% commercial value decline in Tysons
    - Justify cloud migration before budget cuts
    - Approve automation to survive hiring freeze
 
-2. **Digital Infrastructure Plan** 🏗️
+2. **Digital Infrastructure Plan** 
    - Forecast population growth in Route 1 Corridor
    - Deploy fiber before density makes it expensive
    - Install smart city sensors at optimal timing
 
-3. **Service Delivery Plan** 🏛️
+3. **Service Delivery Plan** 
    - Identify gentrification hotspots early
    - Scale Human Services portal capacity
    - Prepare for displaced resident service surges

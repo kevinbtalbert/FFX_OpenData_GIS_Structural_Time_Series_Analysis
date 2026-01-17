@@ -33,8 +33,8 @@ test_cases = [
     },
     # Case 2: HTML wrapped response
     {
-        "input": "<div class=\"chat-message assistant-message\"><strong>🤖 AI Assistant</strong><br><span>Based on the current annual growth rate of 1.72%, the predicted property value for the next 6 months is approximately $368.5 billion.</span></div>",
-        "expected": "🤖 AI AssistantBased on the current annual growth rate of 1.72%, the predicted property value for the next 6 months is approximately $368.5 billion."
+        "input": "<div class=\"chat-message assistant-message\"><strong> AI Assistant</strong><br><span>Based on the current annual growth rate of 1.72%, the predicted property value for the next 6 months is approximately $368.5 billion.</span></div>",
+        "expected": " AI AssistantBased on the current annual growth rate of 1.72%, the predicted property value for the next 6 months is approximately $368.5 billion."
     },
     # Case 3: Paragraph tags
     {
@@ -68,16 +68,16 @@ for i, test in enumerate(test_cases, 1):
     
     # Check if it matches (allowing for whitespace differences)
     if result.strip() == test['expected'].strip():
-        print("✓ PASSED")
+        print(" PASSED")
     else:
-        print("✗ FAILED")
+        print(" FAILED")
         all_passed = False
 
 print("\n" + "=" * 60)
 if all_passed:
-    print("✓ All tests passed!")
+    print(" All tests passed!")
 else:
-    print("✗ Some tests failed")
+    print(" Some tests failed")
 
 # Now test the actual chat display HTML generation
 print("\n" + "=" * 60)
@@ -102,7 +102,7 @@ print(f"After escaping: {escaped_content}")
 # Build the HTML like we do in the app
 chat_html = f"""
 <div class="chat-message assistant-message">
-    <strong>🤖 AI Assistant</strong><br>
+    <strong> AI Assistant</strong><br>
     <span>{escaped_content}</span>
 </div>
 """

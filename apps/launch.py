@@ -12,7 +12,7 @@ import sys
 
 # Verify Python version
 if sys.version_info < (3, 13):
-    print("⚠️  Warning: This application is optimized for Python 3.13+")
+    print("  Warning: This application is optimized for Python 3.13+")
     print(f"   Current version: {sys.version_info.major}.{sys.version_info.minor}")
     print("   Some features may not work as expected.")
     print()
@@ -24,13 +24,13 @@ if sys.version_info < (3, 13):
 # CML sets CDSW_APP_PORT for applications
 port = int(os.getenv('CDSW_APP_PORT', '8090'))
 
-print("🚀 Launching Fairfax County Real Estate Forecast...")
-print(f"📍 Binding to port: {port}")
-print(f"🐍 Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+print(" Launching Fairfax County Real Estate Forecast...")
+print(f" Binding to port: {port}")
+print(f" Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
 print()
 
 # Launch Streamlit with error capture
-print("🔍 Starting Streamlit with debug output...")
+print(" Starting Streamlit with debug output...")
 result = subprocess.run([
     'streamlit',
     'run',
@@ -43,5 +43,5 @@ result = subprocess.run([
 ], capture_output=False, text=True)
 
 if result.returncode != 0:
-    print(f"❌ Streamlit exited with code: {result.returncode}")
+    print(f" Streamlit exited with code: {result.returncode}")
     sys.exit(result.returncode)

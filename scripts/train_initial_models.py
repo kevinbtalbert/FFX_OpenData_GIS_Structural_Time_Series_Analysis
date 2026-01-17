@@ -39,9 +39,9 @@ def main():
                     periods_ahead=6
                 )
                 
-                print(f"    ✓ District {district_id} complete")
+                print(f"     District {district_id} complete")
             except Exception as e:
-                print(f"    ✗ District {district_id} failed: {e}")
+                print(f"     District {district_id} failed: {e}")
         
         # Train county-level model
         print()
@@ -49,9 +49,9 @@ def main():
         try:
             model = api.train_model(district_id=None, periods_ahead=6)
             forecast = api.generate_forecast(district_id=None, periods_ahead=6)
-            print("    ✓ County-level model complete")
+            print("     County-level model complete")
         except Exception as e:
-            print(f"    ✗ County-level model failed: {e}")
+            print(f"     County-level model failed: {e}")
         
         print()
         print("=" * 60)

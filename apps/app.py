@@ -31,7 +31,7 @@ from sts.ai.chatbot import create_chatbot
 
 st.set_page_config(
     page_title="Fairfax County Real Estate Forecast",
-    page_icon="🏘️",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -85,6 +85,7 @@ st.markdown("""
         font-weight: 700;
         margin: 0;
         letter-spacing: -0.5px;
+        color: #ffffff !important;
     }
     
     .main-header p {
@@ -92,6 +93,7 @@ st.markdown("""
         opacity: 0.95;
         margin: 0.5rem 0 0 0;
         font-weight: 400;
+        color: #ffffff !important;
     }
     
     /* Metric cards */
@@ -514,7 +516,7 @@ if 'theme' not in st.session_state:
 
 st.markdown("""
 <div class="main-header">
-    <h1>🏘️ Fairfax County Real Estate Forecast</h1>
+    <h1> Fairfax County Real Estate Forecast</h1>
     <p>AI-Powered Property Value Predictions & Strategic Revenue Insights</p>
 </div>
 """, unsafe_allow_html=True)
@@ -524,19 +526,10 @@ st.markdown("""
 # ==============================================================================
 
 with st.sidebar:
-    # Logo/Header
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                padding: 1.5rem; border-radius: 8px; text-align: center; margin-bottom: 1rem;">
-        <h2 style="color: white; margin: 0;">🏘️ Fairfax County</h2>
-        <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 0.9rem;">Real Estate Forecast</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("### ⚙️ Configuration")
+    st.markdown("###  Configuration")
     
     # District selection
-    st.markdown("#### 📍 Location")
+    st.markdown("####  Location")
     
     @st.cache_data
     def load_districts():
@@ -558,11 +551,11 @@ with st.sidebar:
     if len(districts) > 0:
         view_level = st.radio(
             "Analysis Level",
-            ["🏙️ County Total", "📍 Specific District"],
+            [" County Total", " Specific District"],
             help="Choose between county-wide or district-level analysis"
         )
         
-        if view_level == "📍 Specific District":
+        if view_level == " Specific District":
             if not district_summary.empty:
                 st.markdown("**Top Districts by Value:**")
                 top_districts = district_summary.head(15)['district'].tolist()
@@ -582,13 +575,13 @@ with st.sidebar:
         else:
             selected_district = None
     else:
-        st.warning("⚠️ No district data available")
+        st.warning(" No district data available")
         selected_district = None
     
     st.markdown("---")
     
     # Forecast parameters
-    st.markdown("#### 📊 Forecast Settings")
+    st.markdown("####  Forecast Settings")
     
     periods_ahead = st.slider(
         "Forecast Periods",
@@ -608,12 +601,12 @@ with st.sidebar:
     st.markdown("---")
     
     # Model management
-    st.markdown("#### 🤖 Model Management")
+    st.markdown("####  Model Management")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("🔄 Train", width='stretch', help="Train new model", key="train_btn"):
+        if st.button(" Train", width='stretch', help="Train new model", key="train_btn"):
             with st.spinner("Training model... This may take 30-60 seconds."):
                 try:
                     st.session_state.forecast_api.train_model(
@@ -621,26 +614,26 @@ with st.sidebar:
                         periods_ahead=periods_ahead,
                         growth_rate=0.03
                     )
-                    st.success("✓ Model trained successfully!")
+                    st.success(" Model trained successfully!")
                     st.balloons()
                 except Exception as e:
-                    st.error(f"❌ Training failed: {str(e)}")
+                    st.error(f" Training failed: {str(e)}")
                     import traceback
                     st.code(traceback.format_exc())
     
     with col2:
-        if st.button("📊 Forecast", width='stretch', help="Generate forecast", key="forecast_btn"):
+        if st.button(" Forecast", width='stretch', help="Generate forecast", key="forecast_btn"):
             with st.spinner("Generating forecast..."):
                 try:
                     st.session_state.forecast_api.generate_forecast(
                         district_id=selected_district,
                         periods_ahead=periods_ahead
                     )
-                    st.success("✓ Forecast generated successfully!")
+                    st.success(" Forecast generated successfully!")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Forecast failed: {str(e)}")
-                    st.info("💡 Tip: Make sure to train the model first using the 🔄 Train button.")
+                    st.error(f" Forecast failed: {str(e)}")
+                    st.info(" Tip: Make sure to train the model first using the  Train button.")
                     import traceback
                     with st.expander("Show error details"):
                         st.code(traceback.format_exc())
@@ -648,7 +641,7 @@ with st.sidebar:
     st.markdown("---")
     
     # Info
-    st.markdown("#### ℹ️ About")
+    st.markdown("#### ℹ About")
     st.markdown("""
     <div style='font-size: 0.85rem; color: #64748b;'>
     <strong>Version:</strong> 3.0.0<br>
@@ -670,7 +663,7 @@ col_dashboard, col_chat = st.columns([6, 4], gap="large")
 # ==============================================================================
 
 with col_dashboard:
-    st.markdown('<div class="section-header">📈 Forecast Dashboard</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Forecast Dashboard</div>', unsafe_allow_html=True)
     
     try:
         # Load forecast data
@@ -819,7 +812,7 @@ with col_dashboard:
         st.plotly_chart(fig, width='stretch')
         
         # AI EXPLANATION SECTION
-        st.markdown("#### 🤖 AI Analysis")
+        st.markdown("####  AI Analysis")
         with st.spinner("Generating AI explanation..."):
             try:
                 # Generate AI explanation of the forecast
@@ -847,7 +840,7 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
                 </div>
                 """, unsafe_allow_html=True)
             except Exception as e:
-                st.info("💡 **Quick Summary:** " + 
+                st.info(" **Quick Summary:** " + 
                        f"The forecast projects {'growth' if forecast_summary['total_growth_pct'] > 0 else 'decline'} " +
                        f"of {abs(forecast_summary['total_growth_pct']):.1f}% over the next 6 months, " +
                        f"from ${forecast_summary['base_value']/1e9:.2f}B to ${forecast_summary['final_predicted_value']/1e9:.2f}B. " +
@@ -866,7 +859,7 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
             
             st.markdown(f"""
             <div class="warning-box">
-                <h4 style="margin: 0 0 0.5rem 0;">⚠️ Downside Risk</h4>
+                <h4 style="margin: 0 0 0.5rem 0;"> Downside Risk</h4>
                 <div style="font-size: 1.5rem; font-weight: 700; color: #ef4444;">
                     ${downside_risk/1e6:.1f}M
                 </div>
@@ -883,7 +876,7 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
             
             st.markdown(f"""
             <div class="success-box">
-                <h4 style="margin: 0 0 0.5rem 0;">📈 Upside Potential</h4>
+                <h4 style="margin: 0 0 0.5rem 0;"> Upside Potential</h4>
                 <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">
                     ${upside_potential/1e6:.1f}M
                 </div>
@@ -894,7 +887,7 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
             """, unsafe_allow_html=True)
         
         # DETAILED PREDICTIONS TABLE
-        with st.expander("📋 Detailed Predictions Table", expanded=False):
+        with st.expander(" Detailed Predictions Table", expanded=False):
             predictions_df = pd.DataFrame(forecast_summary['predictions'])
             predictions_df['date'] = pd.to_datetime(predictions_df['date']).dt.strftime('%Y-%m-%d')
             predictions_df['predicted_value'] = predictions_df['predicted_value'].apply(lambda x: f"${x:,.0f}")
@@ -918,12 +911,12 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
     except Exception as e:
         st.markdown("""
         <div class="info-box">
-            <h4 style="margin: 0 0 0.5rem 0;">ℹ️ Getting Started</h4>
+            <h4 style="margin: 0 0 0.5rem 0;">ℹ Getting Started</h4>
             <p style="margin: 0;">No forecast data available yet. Follow these steps:</p>
             <ol style="margin: 0.5rem 0 0 1rem;">
                 <li>Select a district or view county total</li>
-                <li>Click <strong>🔄 Train</strong> to train the model</li>
-                <li>Click <strong>📊 Forecast</strong> to generate predictions</li>
+                <li>Click <strong> Train</strong> to train the model</li>
+                <li>Click <strong> Forecast</strong> to generate predictions</li>
                 <li>Explore the dashboard and ask the AI assistant questions!</li>
             </ol>
         </div>
@@ -934,12 +927,12 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
 # ==============================================================================
 
 with col_chat:
-    st.markdown('<div class="section-header">💬 AI Assistant</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> AI Assistant</div>', unsafe_allow_html=True)
     
     if st.session_state.using_mock:
         st.markdown("""
         <div class="info-box" style="font-size: 0.85rem;">
-            ℹ️ Using mock chatbot. Configure Azure OpenAI for full AI capabilities.
+            ℹ Using mock chatbot. Configure Azure OpenAI for full AI capabilities.
         </div>
         """, unsafe_allow_html=True)
     
@@ -951,7 +944,7 @@ with col_chat:
                 st.write(clean_chat_text(message.get("content", "")))
     
     # Suggested questions
-    with st.expander("💡 Suggested Questions", expanded=True):
+    with st.expander(" Suggested Questions", expanded=True):
         suggested = st.session_state.chatbot.get_suggested_questions()
         for i, question in enumerate(suggested[:5]):
             if st.button(question, key=f"suggested_{i}", width='stretch'):
@@ -970,10 +963,10 @@ with col_chat:
         col_send, col_clear = st.columns([3, 1])
         
         with col_send:
-            send_button = st.form_submit_button("📤 Send", type="primary", use_container_width=True)
+            send_button = st.form_submit_button(" Send", type="primary", use_container_width=True)
         
         with col_clear:
-            clear_button = st.form_submit_button("🗑️ Clear", use_container_width=True)
+            clear_button = st.form_submit_button(" Clear", use_container_width=True)
     
     # Handle clear button
     if clear_button:
@@ -1009,7 +1002,7 @@ with col_chat:
             context = None
         
         # Get AI response
-        with st.spinner("🤔 Thinking..."):
+        with st.spinner(" Thinking..."):
             try:
                 response = st.session_state.chatbot.chat(
                     user_input,

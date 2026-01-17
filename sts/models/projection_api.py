@@ -67,7 +67,7 @@ class ProjectionAPI:
         # Save
         self._save_projection(projections, model_key)
         
-        print(f"✓ Model trained for {model_key}")
+        print(f" Model trained for {model_key}")
         return model
     
     def generate_forecast(

@@ -29,7 +29,7 @@ def load_fairfax_raw_data(
     # Extract district from PARID (first 4 digits)
     df['district'] = df['PARID'].astype(str).str[:4]
     
-    print(f"✓ Loaded {len(df):,} properties")
+    print(f" Loaded {len(df):,} properties")
     print(f"  Tax Year: {df['TAXYR'].unique()}")
     print(f"  Districts: {df['district'].nunique()}")
     print(f"  Total Assessed Value: ${df['APRTOT'].sum():,.0f}")
@@ -98,7 +98,7 @@ def load_fairfax_assessed_values(
     
     # Generate synthetic historical data if needed
     if generate_historical and unique_years == 1:
-        print("⚠️  Only one year of data detected. Generating synthetic historical data for demonstration...")
+        print("  Only one year of data detected. Generating synthetic historical data for demonstration...")
         grouped = _generate_historical_data(grouped, aggregate_by)
     
     print(f"Loaded {len(grouped)} district-year combinations")
@@ -169,7 +169,7 @@ def _generate_historical_data(df: pd.DataFrame, aggregate_by: str, years_back: i
     all_data = pd.concat([df] + historical_dfs, ignore_index=True)
     all_data = all_data.sort_values(['district', 'ds'] if 'district' in all_data.columns else 'ds')
     
-    print(f"✓ Generated {years_back} years of synthetic historical data ({current_year_num - years_back} to {current_year_num})")
+    print(f" Generated {years_back} years of synthetic historical data ({current_year_num - years_back} to {current_year_num})")
     print(f"  Using realistic growth rates (2.5-4.5% annually)")
     
     return all_data.reset_index(drop=True)
