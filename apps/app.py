@@ -14,6 +14,9 @@ from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
 import os
 import sys
+import html
+import re
+from html.parser import HTMLParser
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -376,6 +379,48 @@ st.markdown("""
 # ==============================================================================
 # SESSION STATE INITIALIZATION
 # ==============================================================================
+
+# Shared HTML/text cleaning utilities (avoid rendering HTML in chat)
+class MLStripper(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs = True
+        self.text = []
+
+    def handle_data(self, d):
+        self.text.append(d)
+
+    def get_data(self):
+        return ''.join(self.text)
+
+
+def strip_tags(value: str) -> str:
+    s = MLStripper()
+    s.feed(value)
+    return s.get_data()
+
+
+def clean_chat_text(value: str) -> str:
+    if value is None:
+        return ""
+    cleaned = str(value)
+    # Unescape HTML entities (sometimes double-encoded)
+    for _ in range(4):
+        unescaped = html.unescape(cleaned)
+        if unescaped == cleaned:
+            break
+        cleaned = unescaped
+    # Remove code fences that often wrap HTML snippets
+    cleaned = re.sub(r"```(?:html|xml)?\s*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = cleaned.replace("```", "")
+    # Strip tags and any residual angle-bracket content
+    cleaned = strip_tags(cleaned)
+    cleaned = re.sub(r"<[^>]+>", "", cleaned)
+    cleaned = cleaned.replace("<", "").replace(">", "")
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
 
 # Initialize chatbot - ALWAYS recreate to ensure fresh state
 try:
@@ -793,28 +838,8 @@ Focus on: What does this mean for revenue planning? Any concerns or opportunitie
                     forecast_data=forecast_summary
                 )
                 
-                # Strip HTML tags from AI explanation
-                import re
-                from html.parser import HTMLParser
-                
-                class MLStripper(HTMLParser):
-                    def __init__(self):
-                        super().__init__()
-                        self.reset()
-                        self.strict = False
-                        self.convert_charrefs= True
-                        self.text = []
-                    def handle_data(self, d):
-                        self.text.append(d)
-                    def get_data(self):
-                        return ''.join(self.text)
-                
-                def strip_tags(html):
-                    s = MLStripper()
-                    s.feed(html)
-                    return s.get_data()
-                
-                ai_explanation = strip_tags(ai_explanation)
+                # Clean any HTML/markup from AI explanation
+                ai_explanation = clean_chat_text(ai_explanation)
                 
                 st.markdown(f"""
                 <div class="info-box">
@@ -918,52 +943,12 @@ with col_chat:
         </div>
         """, unsafe_allow_html=True)
     
-    # Chat container with scrollable history - build as single HTML block
-    import re
-    from html.parser import HTMLParser
-    
-    class MLStripper(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.reset()
-            self.strict = False
-            self.convert_charrefs= True
-            self.text = []
-        def handle_data(self, d):
-            self.text.append(d)
-        def get_data(self):
-            return ''.join(self.text)
-    
-    def strip_html_tags(html):
-        """Completely remove all HTML tags and return only text content"""
-        s = MLStripper()
-        s.feed(html)
-        return s.get_data()
-    
-    chat_html = '<div class="chat-container">'
-    
-    # Display chat history - strip ALL HTML tags from content
-    for message in st.session_state.chat_history:
-        # Completely strip all HTML tags
-        clean_content = strip_html_tags(message['content'])
-        
-        if message['role'] == 'user':
-            chat_html += f"""
-            <div class="chat-message user-message">
-                <strong style="color: white !important;">👤 You</strong><br>
-                <span style="color: white !important;">{clean_content}</span>
-            </div>
-            """
-        else:
-            chat_html += f"""
-            <div class="chat-message assistant-message">
-                <strong>🤖 AI Assistant</strong><br>
-                <span>{clean_content}</span>
-            </div>
-            """
-    
-    chat_html += '</div>'
-    st.markdown(chat_html, unsafe_allow_html=True)
+    # Chat history (no HTML rendering to avoid showing raw tags)
+    with st.container():
+        for message in st.session_state.chat_history:
+            role = "user" if message.get("role") == "user" else "assistant"
+            with st.chat_message(role):
+                st.write(clean_chat_text(message.get("content", "")))
     
     # Suggested questions
     with st.expander("💡 Suggested Questions", expanded=True):
@@ -1006,7 +991,7 @@ with col_chat:
         # Add user message
         st.session_state.chat_history.append({
             'role': 'user',
-            'content': user_input
+            'content': clean_chat_text(user_input)
         })
         
         # Get forecast context
@@ -1032,29 +1017,8 @@ with col_chat:
                     context=context
                 )
                 
-                # Strip any HTML tags from the response
-                import re
-                from html.parser import HTMLParser
-                
-                class MLStripper(HTMLParser):
-                    def __init__(self):
-                        super().__init__()
-                        self.reset()
-                        self.strict = False
-                        self.convert_charrefs= True
-                        self.text = []
-                    def handle_data(self, d):
-                        self.text.append(d)
-                    def get_data(self):
-                        return ''.join(self.text)
-                
-                def strip_tags(html):
-                    s = MLStripper()
-                    s.feed(html)
-                    return s.get_data()
-                
-                # Clean the response
-                response = strip_tags(response)
+                # Clean the response to avoid showing HTML snippets
+                response = clean_chat_text(response)
                 
             except Exception as e:
                 response = f"I apologize, but I encountered an error: {str(e)}. Please try rephrasing your question."
@@ -1062,7 +1026,7 @@ with col_chat:
         # Add assistant message (now cleaned of HTML)
         st.session_state.chat_history.append({
             'role': 'assistant',
-            'content': response
+            'content': clean_chat_text(response)
         })
         
         st.rerun()
